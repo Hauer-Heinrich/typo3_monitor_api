@@ -12,6 +12,4 @@ call_user_func(static function () {
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addUserTSConfig(
         "@import 'EXT:typo3_monitor_api/Configuration/TsConfig/User/0100_default.typoscript'"
     );
-
-
 });
