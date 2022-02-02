@@ -22,7 +22,8 @@
     },
     "autoload": {
         "psr-4": {
-            "HauerHeinrich\\Typo3MonitorApi\\": "Classes"
+            "HauerHeinrich\\Typo3MonitorApi\\": "Classes",
+            "Pecee\\": "Vendor/simple-php-router/src/Pecee"
         }
     },
     "extra": {

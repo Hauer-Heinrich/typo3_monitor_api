@@ -20,6 +20,7 @@ $EM_CONF['typo3_monitor_api'] = [
     'autoload' => [
         'psr-4' => [
             'HauerHeinrich\\Typo3MonitorApi\\' => 'Classes',
+            'Pecee\\' => 'Vendor/simple-php-router/src/Pecee'
         ],
     ],
 ];

@@ -9,6 +9,8 @@ use TYPO3\CMS\Core\Http\JsonResponse;
 
 use HauerHeinrich\Typo3MonitorApi\Utility\Route;
 
+use Pecee\SimpleRouter\SimpleRouter;
+
 class RoutingConfig {
     static function addRouting($request): JsonResponse {
         $returnValue = [];
@@ -53,19 +55,26 @@ class RoutingConfig {
             'UpdateMinorTypo3',
         ];
 
-        // TODO: isUserAuthorized
-        // Route::add('/typo3-monitor-api/([a-z-0-9-]*)', function($operationUrl) use (&$request, &$response, &$returnValue) {
-        //     \HauerHeinrich\Typo3MonitorApi\Authorization\UserAuthorizationProvider::isUserAuthorized($request, '');
-        // }, 'post');
+        SimpleRouter::group(['middleware' => \HauerHeinrich\Typo3MonitorApi\Middleware\SimpleRouterMiddleware::class], function () {
+            SimpleRouter::post('/typo3-monitor-api/v1/test', function () {
+                DebuggerUtility::var_dump($className);
+                // Uses Auth Middleware
+            });
 
-        foreach ($methodsAllowed as $method) {
-            // TODO: add closure::bind() to Route::add() method
-            Route::add('/typo3-monitor-api/' . $method ."()", function() use ($method, &$response) {
-                $response = self::UserAuth($response, 'HauerHeinrich\\Typo3MonitorApi\\Operation\\' . $method);
-            }, 'post');
-        }
+            SimpleRouter::post('/typo3-monitor-api/v1/user/profile', function () {
+                DebuggerUtility::var_dump($className);
+                // Uses Auth Middleware
+            });
+        });
 
-        Route::run('/');
+        // SimpleRouter::post('/typo3-monitor-api/v1/{method}/{params?}', function($className, $params = null) {
+        //     DebuggerUtility::var_dump($className);
+        //     DebuggerUtility::var_dump($params);
+        //     die();
+        // })->where([ 'method' => '[A-Za-z]+' ]);
+
+        // Start the routing
+        SimpleRouter::start();
 
         return $response;
     }

@@ -14,22 +14,12 @@ use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\PasswordHashFactory;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Connection;
 use HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
 use HauerHeinrich\Typo3MonitorApi\Domain\Model\User;
-use TYPO3\CMS\Core\Html\RteHtmlParser;
-use TYPO3Fluid\Fluid\ViewHelpers\DebugViewHelper;
 
 class BasicAuthenticationProvider
 {
     private $data = [];
-
-    /**
-     * ServerRequest
-     *
-     * @var \TYPO3\CMS\Core\Http\ServerRequest
-     */
-    protected $request;
 
     /**
      * Extension configuration
@@ -45,8 +35,7 @@ class BasicAuthenticationProvider
      */
     private $isValid = false;
 
-    public function __construct(\TYPO3\CMS\Core\Http\ServerRequest $request, User $user) {
-        $this->request = $request;
+    public function __construct(User $user) {
         // $this->config = Configuration::getExtConfiguration();
 
         $this->validateRequestUserName($user->getUserName());

@@ -11,18 +11,10 @@ namespace HauerHeinrich\Typo3MonitorApi\Middleware;
  */
 
 use \TYPO3\CMS\Extbase\Utility\DebuggerUtility;
-use TYPO3\CMS\Core\Http\Response;
-use TYPO3\CMS\Core\Log\LogManager;
-use TYPO3\CMS\Core\Http\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-
-use HauerHeinrich\Typo3MonitorApi\Authorization\IpAuthorizationProvider;
-use HauerHeinrich\Typo3MonitorApi\Authorization\HttpMethodAuthorizationProvider;
-use HauerHeinrich\Typo3MonitorApi\Authorization\OperationAuthorizationProvider;
 
 class MonitorApi implements MiddlewareInterface {
 
@@ -48,7 +40,7 @@ class MonitorApi implements MiddlewareInterface {
             $user = new \HauerHeinrich\Typo3MonitorApi\Domain\Model\User($apiUserName, $apiUserPassword);
 
             // User Authentication
-            $basicAuth = new \HauerHeinrich\Typo3MonitorApi\Authentication\BasicAuthenticationProvider($request, $user);
+            $basicAuth = new \HauerHeinrich\Typo3MonitorApi\Authentication\BasicAuthenticationProvider($user);
             $isUserAuthenticated = $basicAuth->isValid();
 
             if($isUserAuthenticated) {
