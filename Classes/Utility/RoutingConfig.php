@@ -55,17 +55,24 @@ class RoutingConfig {
             'UpdateMinorTypo3',
         ];
 
+        SimpleRouter::post('/typo3-monitor-api/v1/401', function () {
+            DebuggerUtility::var_dump('User not logged in! 401');
+            // Uses Auth Middleware
+        });
+
+
         SimpleRouter::group(['middleware' => \HauerHeinrich\Typo3MonitorApi\Middleware\SimpleRouterMiddleware::class], function () {
             SimpleRouter::post('/typo3-monitor-api/v1/test', function () {
-                DebuggerUtility::var_dump($className);
+                DebuggerUtility::var_dump('test');
                 // Uses Auth Middleware
             });
 
             SimpleRouter::post('/typo3-monitor-api/v1/user/profile', function () {
-                DebuggerUtility::var_dump($className);
+                DebuggerUtility::var_dump('test/2');
                 // Uses Auth Middleware
             });
         });
+
 
         // SimpleRouter::post('/typo3-monitor-api/v1/{method}/{params?}', function($className, $params = null) {
         //     DebuggerUtility::var_dump($className);
