@@ -1,0 +1,35 @@
+{
+    "name": "hauerheinrich/typo3_monitor_api",
+    "type": "typo3-cms-extension",
+    "description": "",
+    "authors": [
+        {
+            "name": "Christian Hackl",
+            "email": "web@hauer-heinrich.de"
+        }
+    ],
+    "version": "0.1.0",
+    "license": "GPL-2.0",
+    "keywords": ["TYPO3 CMS"],
+    "replace": {
+        "typo3_monitor_api": "self.version",
+        "typo3-ter/typo3_monitor_api": "self.version"
+    },
+    "require": {
+        "typo3/cms-core": "^10.4.0 || ^11.5.0"
+    },
+    "suggest": {
+    },
+    "autoload": {
+        "psr-4": {
+            "HauerHeinrich\\Typo3MonitorApi\\": "Classes"
+        }
+    },
+    "extra": {
+        "typo3/cms": {
+            "cms-package-dir": "{$vendor-dir}/typo3/cms",
+            "web-dir": ".Build/Web",
+            "extension-key": "typo3_monitor_api"
+        }
+    }
+}
