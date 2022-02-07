@@ -20,6 +20,8 @@ class UserAuthorizationProvider
     public static function isUserAuthorized($response, string $classNameSpace, User $user): bool
     {
         $config = Configuration::getExtConfiguration();
+
+        DebuggerUtility::var_dump($config);
         // TODO:
         return true;
     }

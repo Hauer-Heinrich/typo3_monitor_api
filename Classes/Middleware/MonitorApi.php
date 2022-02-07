@@ -18,9 +18,10 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-use HauerHeinrich\Typo3MonitorApi\Authorization\IpAuthorizationProvider;
-use HauerHeinrich\Typo3MonitorApi\Authorization\HttpMethodAuthorizationProvider;
-use HauerHeinrich\Typo3MonitorApi\Authorization\OperationAuthorizationProvider;
+use HauerHeinrich\Typo3MonitorApi\Authentication\IpAuthenticationProvider;
+use HauerHeinrich\Typo3MonitorApi\Authentication\BasicAuthenticationProvider;
+use HauerHeinrich\Typo3MonitorApi\Authentication\OperationAuthorizationProvider;
+use HauerHeinrich\Typo3MonitorApi\Domain\Model\User;
 
 class MonitorApi implements MiddlewareInterface {
 
@@ -40,29 +41,50 @@ class MonitorApi implements MiddlewareInterface {
 
         if($this->startsWith($requestedPath, '/typo3-monitor-api')) {
             // check IP white
-            if(\HauerHeinrich\Typo3MonitorApi\Authentication\IpAuthenticationProvider::checkIpAddress($request)) {
+            if(IpAuthenticationProvider::checkIpAddress($request)) {
+                // User initialization
+                $apiUserName = array_key_exists('PHP_AUTH_USER', $request->getServerParams()) ? $request->getServerParams()['PHP_AUTH_USER'] : '';
+                $apiUserPassword = array_key_exists('PHP_AUTH_PW', $request->getServerParams()) ? $request->getServerParams()['PHP_AUTH_PW'] : '';
 
+                if(empty($apiUserName)) {
+                    $auth_token = null;
+                    if (array_key_exists('HTTP_AUTHORIZATION', $request->getServerParams())) {
+                        $auth_token = $request->getServerParams()['HTTP_AUTHORIZATION'];
+                    } elseif (array_key_exists('REDIRECT_HTTP_AUTHORIZATION', $request->getServerParams())) {
+                        $auth_token = $request->getServerParams()['REDIRECT_HTTP_AUTHORIZATION'];
+                    }
+
+                    if ($auth_token != null) {
+                        if (strpos(strtolower($auth_token), 'basic') === 0) {
+                            list($apiUserName, $apiUserPassword) = explode(':', base64_decode(substr($auth_token, 6)));
+                        }
+                    }
+                }
+
+                if(!empty($apiUserName) && !empty($apiUserPassword)) {
+                    $user = new User($apiUserName, $apiUserPassword);
+
+                    // User Authentication
+                    $basicAuth = new BasicAuthenticationProvider($request, $user);
+                    $isUserAuthenticated = $basicAuth->isValid();
+
+                    if($isUserAuthenticated) {
+                        return \HauerHeinrich\Typo3MonitorApi\Utility\RoutingConfig::setRoutingConfigs($request, $user);
+                    }
+                }
+
+                // TODO: log $basicAuth->getLogData();#
+                // throw exception
+                $response = GeneralUtility::makeInstance(JsonResponse::class);
+                $response = $response->withStatus(401, 'not allowed');
+                $response->getBody()->write('Name or pasword wrong or not set');
+
+                return $response;
             }
 
-            // User initialization
-            $apiUserName = $request->getServerParams()['PHP_AUTH_USER'];
-            $apiUserPassword = $request->getServerParams()['PHP_AUTH_PW'];
-
-            $user = new \HauerHeinrich\Typo3MonitorApi\Domain\Model\User($apiUserName, $apiUserPassword);
-
-            // User Authentication
-            $basicAuth = new \HauerHeinrich\Typo3MonitorApi\Authentication\BasicAuthenticationProvider($request, $user);
-            $isUserAuthenticated = $basicAuth->isValid();
-
-            if($isUserAuthenticated) {
-                return \HauerHeinrich\Typo3MonitorApi\Utility\RoutingConfig::setRoutingConfigs($request, $user);
-            }
-
-            // TODO: log $basicAuth->getLogData();#
-            // throw exception
             $response = GeneralUtility::makeInstance(JsonResponse::class);
             $response = $response->withStatus(401, 'not allowed');
-            $response->getBody()->write('User not allowed');
+            $response->getBody()->write('IP not allowed');
 
             return $response;
         }

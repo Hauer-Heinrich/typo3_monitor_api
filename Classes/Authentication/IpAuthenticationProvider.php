@@ -31,15 +31,19 @@ class IpAuthenticationProvider
             }
 
             $allowedIps = explode(',', $config['allowedIps']);
-            $remoteHost = $request->getAttribute('normalizedParams')->getRemoteHost();
+            $remoteAddress = $request->getAttribute('normalizedParams')->getRemoteAddress();
+
+            if(empty($remoteAddress)) {
+                return false;
+            }
 
             foreach ($allowedIps as $ip) {
-                if($ip === $remoteHost) {
+                if($ip === $remoteAddress) {
                     return true;
                 }
 
                 // Check if its in a valid IP Range
-                if(strpos($remoteHost, $ip) === 0 && preg_match("(:|.)", $ip) === 1 && substr($ip, -1) === ".") {
+                if(strpos($remoteAddress, $ip) === 0 && preg_match("(:|.)", $ip) === 1 && substr($ip, -1) === ".") {
                     return true;
                 }
             }
