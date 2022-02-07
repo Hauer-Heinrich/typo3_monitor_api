@@ -51,13 +51,13 @@ class RoutingConfig {
         foreach ($methodsAllowed as $method) {
             Route::add('/typo3-monitor-api/v1/' . $method ."()", function() use ($method, &$response, $user) {
                 $response = self::UserAuth($response, 'HauerHeinrich\\Typo3MonitorApi\\Operation\\' . $method, $user);
-            }, 'post');
+            }, 'get');
         }
 
         Route::add('/typo3-monitor-api/v1/([a-z-0-9-_=!?@]*)', function() use (&$response) {
             $response = $response->withStatus(404, 'Not found');
             $response->getBody()->write('Not found');
-        }, 'post');
+        }, 'get');
 
         Route::run('/');
 
