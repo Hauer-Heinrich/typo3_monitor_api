@@ -12,12 +12,14 @@ namespace HauerHeinrich\Typo3MonitorApi\Authorization;
 
 use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-
+use HauerHeinrich\Typo3MonitorApi\Domain\Model\User;
+use HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
 
 class UserAuthorizationProvider
 {
-    public static function isUserAuthorized($user, $URLPFAD): bool
+    public static function isUserAuthorized($response, string $classNameSpace, User $user): bool
     {
+        $config = Configuration::getExtConfiguration();
         // TODO:
         return true;
     }

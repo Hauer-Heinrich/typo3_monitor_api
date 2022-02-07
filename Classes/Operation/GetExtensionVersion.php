@@ -12,9 +12,7 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
 
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
-use HauerHeinrich\Typo3MonitorApi\Exception\InvalidArgumentException;
 use HauerHeinrich\Typo3MonitorApi\OperationResult;
-
 
 /**
  * An Operation that returns the version of an installed extension
@@ -45,11 +43,12 @@ class GetExtensionVersion implements IOperation, SingletonInterface
             return new OperationResult(false, [], 'Extension [' . $extensionKey . '] is not loaded');
         }
 
-        @include(ExtensionManagementUtility::extPath($extensionKey, 'ext_emconf.php'));
+        include(ExtensionManagementUtility::extPath($extensionKey, 'ext_emconf.php'));
 
         if (is_array($EM_CONF[$extensionKey])) {
             return new OperationResult(true, [[ 'version' => $EM_CONF[$extensionKey]['version'] ]]);
         }
+
         return new OperationResult(false, [], 'Cannot read EM_CONF for extension [' . $extensionKey . ']');
     }
 }

@@ -11,8 +11,6 @@ namespace HauerHeinrich\Typo3MonitorApi\Middleware;
  */
 
 use \TYPO3\CMS\Extbase\Utility\DebuggerUtility;
-use TYPO3\CMS\Core\Http\Response;
-use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -41,6 +39,11 @@ class MonitorApi implements MiddlewareInterface {
         $requestedPath = $requestedUri->getPath();
 
         if($this->startsWith($requestedPath, '/typo3-monitor-api')) {
+            // check IP white
+            if(\HauerHeinrich\Typo3MonitorApi\Authentication\IpAuthenticationProvider::checkIpAddress($request)) {
+
+            }
+
             // User initialization
             $apiUserName = $request->getServerParams()['PHP_AUTH_USER'];
             $apiUserPassword = $request->getServerParams()['PHP_AUTH_PW'];
@@ -52,18 +55,30 @@ class MonitorApi implements MiddlewareInterface {
             $isUserAuthenticated = $basicAuth->isValid();
 
             if($isUserAuthenticated) {
-                return \HauerHeinrich\Typo3MonitorApi\Utility\RoutingConfig::addRouting($request);
+                return \HauerHeinrich\Typo3MonitorApi\Utility\RoutingConfig::setRoutingConfigs($request, $user);
             }
 
             // TODO: log $basicAuth->getLogData();#
             // throw exception
+            $response = GeneralUtility::makeInstance(JsonResponse::class);
+            $response = $response->withStatus(401, 'not allowed');
+            $response->getBody()->write('User not allowed');
+
+            return $response;
         }
 
         return $handler->handle($request);
     }
 
-    public function startsWith( $haystack, $needle ) {
+    /**
+     * startsWith
+     *
+     * @param string $haystack
+     * @param string $needle
+     * @return void
+     */
+    public function startsWith(string $haystack, string $needle) {
         $length = strlen( $needle );
         return substr( $haystack, 0, $length ) === $needle;
-   }
+    }
 }

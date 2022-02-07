@@ -25,6 +25,8 @@ use HauerHeinrich\Typo3MonitorApi\OperationResult;
  * @author Tobias Liebig <liebig@networkteam.com>
  * @author Sven Wappler <typo3YYYY@wappler.systems>
  *
+ * TODO: consider TYPO3 12 - ext_emconf.php is depricated -> use componser.json instead
+ *
  */
 class GetExtensionList implements IOperation, SingletonInterface
 {
@@ -110,16 +112,15 @@ class GetExtensionList implements IOperation, SingletonInterface
     {
         $path = $this->getPathForScope($scope);
         $extensionInfo = [];
-        if (@is_dir($path)) {
+        if (is_dir($path)) {
             $extensionFolders = \TYPO3\CMS\Core\Utility\GeneralUtility::get_dirs($path);
             if (is_array($extensionFolders)) {
                 foreach ($extensionFolders as $extKey) {
                     $extensionInfo[$extKey]['ext_key'] = $extKey;
                     $extensionInfo[$extKey]['installed'] = (bool)\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded($extKey);
 
-                    if (@is_file($path . $extKey . '/ext_emconf.php')) {
-                        $_EXTKEY = $extKey;
-                        @include($path . $extKey . '/ext_emconf.php');
+                    if (is_file($path . $extKey . '/ext_emconf.php')) {
+                        include($path . $extKey . '/ext_emconf.php');
                         $extensionVersion = $EM_CONF[$extKey]['version'];
                     } else {
                         $extensionVersion = false;
@@ -131,7 +132,7 @@ class GetExtensionList implements IOperation, SingletonInterface
                     }
 
                     if($withUpdateInfo) {
-                        $hasExtensionUpdate = GeneralUtility::makeInstance('WapplerSystems\\ZabbixClient\\Operation\\HasExtensionUpdate');
+                        $hasExtensionUpdate = GeneralUtility::makeInstance('HauerHeinrich\\Typo3MonitorApi\\Operation\\HasExtensionUpdate');
                         $extensionInfo[$extKey]['hasExtensionUpdate'] = $hasExtensionUpdate->execute(['extensionKey' => $extKey])->toArray();
                     }
                 }

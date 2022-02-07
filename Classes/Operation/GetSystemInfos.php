@@ -37,7 +37,6 @@ class GetSystemInfos implements IOperation, SingletonInterface
         'GetDatabaseVersion',
         'GetApplicationContext',
         'GetTotalLogFilesSize',
-        'GetZabbixLogFileSize',
         'GetOpCacheStatus',
         'GetExtensionList' => [
             'scopes' => 'local',
@@ -93,7 +92,7 @@ class GetSystemInfos implements IOperation, SingletonInterface
             }
 
             if(!empty($methodName)) {
-                $method = GeneralUtility::makeInstance('WapplerSystems\\ZabbixClient\\Operation\\'.$methodName);
+                $method = GeneralUtility::makeInstance('HauerHeinrich\\Typo3MonitorApi\\Operation\\'.$methodName);
 
                 if(!empty($method)) {
                     $resultArray[$methodName] = [$method->execute($methodParams)->toArray()];

@@ -6,13 +6,11 @@ namespace HauerHeinrich\Typo3MonitorApi\Utility;
 use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Http\JsonResponse;
-
+use HauerHeinrich\Typo3MonitorApi\Domain\Model\User;
 use HauerHeinrich\Typo3MonitorApi\Utility\Route;
 
 class RoutingConfig {
-    static function addRouting($request): JsonResponse {
-        $returnValue = [];
-
+    static function setRoutingConfigs(\TYPO3\CMS\Core\Http\ServerRequest $request, User $user): JsonResponse {
         /** @var JsonResponse $response */
         $response = GeneralUtility::makeInstance(JsonResponse::class);
 
@@ -36,7 +34,6 @@ class RoutingConfig {
             'GetOutdatedExtensionList',
             'GetTotalLogFilesSize',
             'HasRemainingUpdates',
-            'GetZabbixLogFileSize',
             'HasExtensionUpdate',
             'HasExtensionUpdateList',
             'HasDeprecationLogEnabled',
@@ -44,24 +41,17 @@ class RoutingConfig {
             'GetFeatureValue',
             'GetOpCacheStatus',
             'GetFileSpoolValue',
-            'GetZabbixClientLock',
             'GetDatabaseAnalyzerSummary',
             'HasFailedSchedulerTask',
             'GetSystemInfos',
-            'GetZabbixFeLog',
             'HasMissingDefaultMailSettings',
             'UpdateMinorTypo3',
         ];
 
-        // TODO: isUserAuthorized
-        // Route::add('/typo3-monitor-api/([a-z-0-9-]*)', function($operationUrl) use (&$request, &$response, &$returnValue) {
-        //     \HauerHeinrich\Typo3MonitorApi\Authorization\UserAuthorizationProvider::isUserAuthorized($request, '');
-        // }, 'post');
-
         foreach ($methodsAllowed as $method) {
             // TODO: add closure::bind() to Route::add() method
-            Route::add('/typo3-monitor-api/' . $method ."()", function() use ($method, &$response) {
-                $response = self::UserAuth($response, 'HauerHeinrich\\Typo3MonitorApi\\Operation\\' . $method);
+            Route::add('/typo3-monitor-api/v1/' . $method ."()", function() use ($method, &$response, $user) {
+                $response = self::UserAuth($response, 'HauerHeinrich\\Typo3MonitorApi\\Operation\\' . $method, $user);
             }, 'post');
         }
 
@@ -70,11 +60,10 @@ class RoutingConfig {
         return $response;
     }
 
-    protected static function UserAuth($response, string $classNameSpace)
+    protected static function UserAuth($response, string $classNameSpace, User $user)
     {
-
         // TODO: isUserAuthorized
-        if(\HauerHeinrich\Typo3MonitorApi\Authorization\UserAuthorizationProvider::isUserAuthorized($request, '')) {
+        if(\HauerHeinrich\Typo3MonitorApi\Authorization\UserAuthorizationProvider::isUserAuthorized($response, $classNameSpace, $user)) {
             $class = GeneralUtility::makeInstance($classNameSpace);
             $resultJSON = json_encode([$class->execute()->toArray()]);
 

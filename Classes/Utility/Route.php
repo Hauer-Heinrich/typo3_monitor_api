@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- * ORIGINAL: https://github.com/steampixel/simplePHPRouter/blob/master/src/Steampixel/Route.php
+ * ORIGINAL: https://github.com/steampixel/simplePHPRouter
  * MIT License
  *
  * Copyright (c) 2018 - 2020 SteamPixel and contributors
