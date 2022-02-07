@@ -21,7 +21,6 @@ class UserAuthorizationProvider
     {
         $config = Configuration::getExtConfiguration();
 
-        DebuggerUtility::var_dump($config);
         // TODO:
         return true;
     }
