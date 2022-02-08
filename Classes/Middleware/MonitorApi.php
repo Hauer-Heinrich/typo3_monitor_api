@@ -84,7 +84,7 @@ class MonitorApi implements MiddlewareInterface {
 
             $response = GeneralUtility::makeInstance(JsonResponse::class);
             $response = $response->withStatus(401, 'not allowed');
-            $response->getBody()->write(json_encode('IP not allowed'));
+            $response->getBody()->write(json_encode(['success' => false, 'exception' => 'IP not allowed']));
 
             return $response;
         }
