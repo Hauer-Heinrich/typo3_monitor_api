@@ -1,7 +1,7 @@
 # cat=api-access/enable; type=user[HauerHeinrich\Typo3MonitorApi\ViewHelpers\AllowedOperationsViewHelper->select]; label=Allowed operations
 operations.allowedOperations =
 
-# cat=api-access/enable; type=string; label=Allowed IPs:Restrict the endpoint to specific IPs. Comma separated lists are possible.
+# cat=api-access/enable; type=string; label=Allowed IPs:Restrict the endpoint to IP Ranges (e.g. 77.6.178.) or specific IPs. Comma separated lists are possible.
 allowedIps =
 
 # cat=api-access/enable; type=integer; label=Duration in minutes that the respective IP should be blocked (e. g. 5 = 5 minutes locked/blocked since last failed attempt)
