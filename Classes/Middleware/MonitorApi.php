@@ -77,14 +77,14 @@ class MonitorApi implements MiddlewareInterface {
                 // throw exception
                 $response = GeneralUtility::makeInstance(JsonResponse::class);
                 $response = $response->withStatus(401, 'not allowed');
-                $response->getBody()->write('Name or pasword wrong or not set');
+                $response->getBody()->write(json_encode([ 'success' => false, 'exception' => 'Name or password wrong or not set', 'message' => 'Name or password wrong or not set' ]));
 
                 return $response;
             }
 
             $response = GeneralUtility::makeInstance(JsonResponse::class);
             $response = $response->withStatus(401, 'not allowed');
-            $response->getBody()->write(json_encode(['success' => false, 'exception' => 'IP not allowed']));
+            $response->getBody()->write(json_encode(['success' => false, 'exception' => 'IP not allowed', 'message' => 'IP not allowed']));
 
             return $response;
         }
