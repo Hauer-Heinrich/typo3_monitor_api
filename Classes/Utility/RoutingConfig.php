@@ -62,6 +62,8 @@ class RoutingConfig {
             $response->getBody()->write('Not found');
         }, 'get');
 
+        Route::run('/');
+
         return $response;
     }
 
