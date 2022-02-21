@@ -10,6 +10,7 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  * LICENSE.txt file that was distributed with this source code.
  */
 
+// use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use TYPO3\CMS\Core\SingletonInterface;
 use HauerHeinrich\Typo3MonitorApi\OperationResult;
 
@@ -30,18 +31,23 @@ class HasMissingDefaultMailSettings implements IOperation, SingletonInterface
     public function execute(array $parameter = []): OperationResult
     {
         $returnValue = [];
+        $missing = [];
         if (empty($GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailFromAddress'])) {
-            $returnValue['defaultMailFromAddress'] = 'defaultMailFromAddress';
+            $missing['defaultMailFromAddress']= 'defaultMailFromAddress';
+        } else {
+            $returnValue['defaultMailFromAddress'] = $GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailFromAddress'];
         }
 
         if (empty($GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailFromName'])) {
-            $returnValue['defaultMailFromName'] = 'defaultMailFromName';
+            $missing['defaultMailFromName']= 'defaultMailFromName';
+        } else {
+            $returnValue['defaultMailFromName'] = $GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailFromName'];
         }
 
-        if(empty($returnValue)) {
-            return new OperationResult(true, [], 'No missing default mail settings detected!');
+        if(empty($missing)) {
+            return new OperationResult(true, [ $returnValue ]);
         }
 
-        return new OperationResult(true, [ $returnValue ]);
+        return new OperationResult(true, [ $missing ], 'Missing default mail settings detected!');
     }
 }
