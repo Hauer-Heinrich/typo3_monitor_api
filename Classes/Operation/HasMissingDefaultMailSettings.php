@@ -10,10 +10,9 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-// use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
+use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use TYPO3\CMS\Core\SingletonInterface;
 use HauerHeinrich\Typo3MonitorApi\OperationResult;
-
 
 /**
  *
@@ -22,6 +21,11 @@ use HauerHeinrich\Typo3MonitorApi\OperationResult;
  */
 class HasMissingDefaultMailSettings implements IOperation, SingletonInterface
 {
+    use \HauerHeinrich\Typo3MonitorApi\Utility\CheckBodyContent;
+
+    public function __construct() {
+        $this->allowedParameter = ['test' => 'array', 'install' => boolean, 'blubb' => integer];
+    }
 
     /**
      *
@@ -30,24 +34,28 @@ class HasMissingDefaultMailSettings implements IOperation, SingletonInterface
      */
     public function execute(array $parameter = []): OperationResult
     {
-        $returnValue = [];
-        $missing = [];
+        $checkBody = $this->checkBodyContent($parameter['request']);
+
+        if($checkBody === false) {
+            return new OperationResult(true, [ $this->errors ], 'bodyContent not valid! Value-type or key wrong / not allowed!');
+        }
+
         if (empty($GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailFromAddress'])) {
-            $missing['defaultMailFromAddress']= 'defaultMailFromAddress';
+            $this->errors['defaultMailFromAddress']= 'defaultMailFromAddress';
         } else {
-            $returnValue['defaultMailFromAddress'] = $GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailFromAddress'];
+            $this->returnValue['defaultMailFromAddress'] = $GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailFromAddress'];
         }
 
         if (empty($GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailFromName'])) {
-            $missing['defaultMailFromName']= 'defaultMailFromName';
+            $this->errors['defaultMailFromName']= 'defaultMailFromName';
         } else {
-            $returnValue['defaultMailFromName'] = $GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailFromName'];
+            $this->returnValue['defaultMailFromName'] = $GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailFromName'];
         }
 
-        if(empty($missing)) {
-            return new OperationResult(true, [ $returnValue ]);
+        if(empty($errors)) {
+            return new OperationResult(true, [ $this->returnValue ]);
         }
 
-        return new OperationResult(true, [ $missing ], 'Missing default mail settings detected!');
+        return new OperationResult(true, [ $this->errors ], 'Missing default mail settings detected!');
     }
 }

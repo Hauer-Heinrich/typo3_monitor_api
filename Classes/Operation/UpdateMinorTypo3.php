@@ -13,6 +13,7 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
+use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Install\Controller\EnvironmentController;
@@ -24,6 +25,8 @@ use HauerHeinrich\Typo3MonitorApi\OperationResult;
  */
 class UpdateMinorTypo3 implements IOperation, SingletonInterface
 {
+    use \HauerHeinrich\Typo3MonitorApi\Utility\CheckBodyContent;
+
     /**
      * @var RequestFactoryInterface
      */
@@ -42,6 +45,7 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
     public function __construct(RequestFactoryInterface $requestFactory) {
         $this->requestFactory = $requestFactory;
         $this->environmentController = GeneralUtility::makeInstance(EnvironmentController::class);
+        $this->allowedParameter = [];
     }
 
     /**
@@ -51,6 +55,8 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
      */
     public function execute(array $parameter = []): OperationResult
     {
+        DebuggerUtility::var_dump($parameter, "test");
+        die();
         $this->request = $parameter['request'];
         $this->initTSFE();
 
@@ -224,13 +230,14 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
     }
 
     protected function initTSFE($typeNum = 0) {
-        $uid = 1;
+        $uid = 1; // TODO better not static value??!!
         $site = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Site\SiteFinder::class)->getSiteByRootPageId($uid);
         $GLOBALS['TYPO3_REQUEST'] = $this->request;
         $GLOBALS['TYPO3_REQUEST'] = $GLOBALS['TYPO3_REQUEST']->withAttribute('site', $site);
         $GLOBALS['TYPO3_REQUEST'] = $GLOBALS['TYPO3_REQUEST']->withAttribute('language', $site->getLanguageById(0));
         $GLOBALS['TSFE']->id = $uid;
 
+        // BREAKING: TODO: don't work at TYPO3 >= 11
         /** @var TypoScriptFrontendController $GLOBALS['TSFE'] */
         $GLOBALS['TSFE'] = GeneralUtility::makeInstance(
             \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController::class,

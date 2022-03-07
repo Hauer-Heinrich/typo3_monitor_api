@@ -44,22 +44,38 @@ class RoutingConfig {
             'GetDatabaseAnalyzerSummary',
             'HasFailedSchedulerTask',
             'GetSystemInfos',
-            'HasMissingDefaultMailSettings'
+            'HasMissingDefaultMailSettings' => [
+                'httpMethod' => 'GET',
+                'parameter' => [],
+            ],
+            'UpdateMinorTypo3' => [
+                'httpMethod' => 'PATCH',
+                'parameter' => [],
+            ],
         ];
 
-        foreach ($methodsAllowed as $method) {
-            Route::add('/typo3-monitor-api/v1/' . $method, function() use ($method, &$response, $user) {
-                $response = self::UserAuth($response, 'HauerHeinrich\\Typo3MonitorApi\\Operation\\' . $method, $user);
-            }, 'get');
-        }
+        $allowedHttpMethods = ['GET', 'POST', 'PATCH'];
 
-        Route::add('/typo3-monitor-api/v1/UpdateMinorTypo3', function() use ($method, &$response, $user) {
-            $response = self::UserAuth($response, 'HauerHeinrich\\Typo3MonitorApi\\Operation\\' . $method, $user);
-        }, 'post');
+        foreach ($methodsAllowed as $methodKey => $methodOptions) {
+            $methodName = isset($methodKey[0]) ? $methodKey : $methodOptions;
+            $httpMethod = 'GET';
+            if(isset($methodOptions['httpMethod'])) {
+                if(in_array($methodOptions['httpMethod'], $allowedHttpMethods)) {
+                    $httpMethod = $methodOptions['httpMethod'];
+                } else {
+                    $response = $response->withStatus(405, 'Method Not Allowed');
+                    $response->getBody()->write('Http method not allowed');
+                }
+            }
+
+            Route::add('/typo3-monitor-api/v1/' . $methodName, function() use ($methodName, &$response, $user, $methodOptions, $request) {
+                $response = self::UserAuth($response, $request, 'HauerHeinrich\\Typo3MonitorApi\\Operation\\' . $methodName, $user, $methodOptions);
+            }, $httpMethod);
+        }
 
         Route::add('/typo3-monitor-api/v1/([a-z-0-9-_=!?@]*)', function() use (&$response) {
             $response = $response->withStatus(404, 'Not found');
-            $response->getBody()->write('Not found');
+            $response->getBody()->write('Operation not found');
         }, 'get');
 
         Route::run('/');
@@ -67,12 +83,28 @@ class RoutingConfig {
         return $response;
     }
 
-    protected static function UserAuth($response, string $classNameSpace, User $user)
+    /**
+     * UserAuth
+     *
+     * @param JsonResponse $response
+     * @param \TYPO3\CMS\Core\Http\ServerRequest $request
+     * @param string $classNameSpace
+     * @param User $user
+     * @param array $methodOptions
+     * @return \TYPO3\CMS\Core\Http\JsonResponse
+     */
+    protected static function UserAuth($response, \TYPO3\CMS\Core\Http\ServerRequest $request,
+        string $classNameSpace, User $user, array $methodOptions
+    ): \TYPO3\CMS\Core\Http\JsonResponse
     {
         // TODO: isUserAuthorized
         if(\HauerHeinrich\Typo3MonitorApi\Authorization\UserAuthorizationProvider::isUserAuthorized($response, $classNameSpace, $user)) {
+            // TODO: check content of body from request if given params are valid === allowed methodOptions
+            // self::areMethodOptionsValid($methodOptions)
+            $params = [];
+            $params['request'] = $request;
             $class = GeneralUtility::makeInstance($classNameSpace);
-            $resultJSON = json_encode([$class->execute()->toArray()]);
+            $resultJSON = json_encode([$class->execute($params)->toArray()]);
 
             $response = $response->withStatus(200, 'allowed');
             $response->getBody()->write($resultJSON);
@@ -81,5 +113,9 @@ class RoutingConfig {
         }
 
         return $response;
+    }
+
+    public static function areMethodOptionsValid(array $methodOptions) {
+
     }
 }
