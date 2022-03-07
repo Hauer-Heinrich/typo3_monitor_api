@@ -59,6 +59,11 @@ class RoutingConfig {
         foreach ($methodsAllowed as $methodKey => $methodOptions) {
             $methodName = isset($methodKey[0]) ? $methodKey : $methodOptions;
             $httpMethod = 'GET';
+
+            if(gettype($methodOptions) === 'string') {
+                $methodOptions = [];
+            }
+
             if(isset($methodOptions['httpMethod'])) {
                 if(in_array($methodOptions['httpMethod'], $allowedHttpMethods)) {
                     $httpMethod = $methodOptions['httpMethod'];
