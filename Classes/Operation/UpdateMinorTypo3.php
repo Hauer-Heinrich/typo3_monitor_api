@@ -55,8 +55,6 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
      */
     public function execute(array $parameter = []): OperationResult
     {
-        DebuggerUtility::var_dump($parameter, "test");
-        die();
         $this->request = $parameter['request'];
         $this->initTSFE();
 
