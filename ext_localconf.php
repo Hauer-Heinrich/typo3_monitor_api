@@ -8,7 +8,7 @@ call_user_func(static function () {
         "@import 'EXT:typo3_monitor_api/Configuration/TypoScript/setup.typoscript'"
     );
 
-    // Add UserTS config as default for all BE users
+    // Add UserTS config as default for all BE users //
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addUserTSConfig(
         "@import 'EXT:typo3_monitor_api/Configuration/TsConfig/User/0100_default.typoscript'"
     );
