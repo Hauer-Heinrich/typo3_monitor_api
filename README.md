@@ -1,5 +1,7 @@
 # typo3_monitor_api
 typo3_monitor_api is a TYPO3 extension.
+Inspired by [zabbix_monitor](https://github.com/WapplerSystems/zabbix_client "Github Repo of zabbix_monitor") extension created by (and thanks to) Sven Wappler.
+typo3_monitor_api extension don't uses zabbix at all and it is not compatible with the zabbix system!
 
 ### Installation
 ... like any other TYPO3 extension [extensions.typo3.org](https://extensions.typo3.org/ "TYPO3 Extension Repository")
