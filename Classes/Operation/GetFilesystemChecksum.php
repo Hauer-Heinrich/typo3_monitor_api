@@ -8,11 +8,14 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
+ *
+ * Edited by www.hauer-heinrich.de
+ * @author
  */
 
-use TYPO3\CMS\Core\SingletonInterface;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use HauerHeinrich\Typo3MonitorApi\OperationResult;
+use \TYPO3\CMS\Core\SingletonInterface;
+use \TYPO3\CMS\Core\Utility\GeneralUtility;
+use \HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 /**
  * Returns a "fingerprint" of a given path, can be used to check if a file or folder has been changed
@@ -23,16 +26,14 @@ use HauerHeinrich\Typo3MonitorApi\OperationResult;
  * @author Tobias Liebig <liebig@networkteam.com>
  *
  */
-class GetFilesystemChecksum implements IOperation, SingletonInterface
-{
+class GetFilesystemChecksum implements IOperation, SingletonInterface {
     /**
      * Get the file / folder checksum of a given path
      *
      * @param array $parameter Path to a file or folder
      * @return OperationResult The checksum of the given folder or file
      */
-    public function execute(array $parameter = []): OperationResult
-    {
+    public function execute(array $parameter = []): OperationResult {
         $path = $this->getPath($parameter['path']);
         $getSingleChecksums = $this->getPath($parameter['getSingleChecksums']);
 
@@ -67,8 +68,7 @@ class GetFilesystemChecksum implements IOperation, SingletonInterface
      * @param string $path absolute or relative path or EXT:foobar/
      * @return string empty if path is invalid, else the absolute path
      */
-    protected function getPath(string $path): string
-    {
+    protected function getPath(string $path): string {
         if (substr($path, -1) === '/') {
             $path = substr($path, 0, -1);
         }
@@ -94,8 +94,7 @@ class GetFilesystemChecksum implements IOperation, SingletonInterface
      * @param string $path file path
      * @return string/bool FALSE if path is not a file or md5 checksum of given file
      */
-    protected function getFileChecksum($path)
-    {
+    protected function getFileChecksum(string $path) {
         if (!is_file($path)) {
             return false;
         }
@@ -109,8 +108,7 @@ class GetFilesystemChecksum implements IOperation, SingletonInterface
      * @param string $path path of folder
      * @return string checksum
      */
-    protected function getFolderChecksum($path)
-    {
+    protected function getFolderChecksum(string $path) {
         if (!is_dir($path)) {
             return $this->getFileChecksum($path);
         }

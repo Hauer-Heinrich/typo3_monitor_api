@@ -51,6 +51,14 @@ trait CheckBodyContent {
         return json_last_error() === JSON_ERROR_NONE;
     }
 
+    /**
+     * getArrayFromBodyJson
+     * checks if request body is json, if true then return json as array
+     * else return empty array
+     *
+     * @param \TYPO3\CMS\Core\Http\ServerRequest $request
+     * @return array
+     */
     public function getArrayFromBodyJson(\TYPO3\CMS\Core\Http\ServerRequest $request): array {
         if($this->checkBodyContentForValidJson($request)) {
             $bodyContent = $request->getBody()->getContents();

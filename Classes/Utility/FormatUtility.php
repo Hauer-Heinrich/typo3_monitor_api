@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+namespace HauerHeinrich\Typo3MonitorApi\Utility;
+
 /**
  * ORIGINAL: https://github.com/steampixel/simplePHPRouter
  * MIT License
@@ -8,9 +10,8 @@ declare(strict_types=1);
  * Copyright (c) 2018 - 2020 SteamPixel and contributors
  *
  * Edited by www.hauer-heinrich.de
-*/
-
-namespace HauerHeinrich\Typo3MonitorApi\Utility;
+ * @author
+ */
 
 class FormatUtility {
 

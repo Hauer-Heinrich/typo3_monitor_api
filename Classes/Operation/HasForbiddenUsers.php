@@ -9,17 +9,19 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
+ *
+ * Edited by www.hauer-heinrich.de
+ * @author
  */
 
 // use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
-use TYPO3\CMS\Core\SingletonInterface;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
-use HauerHeinrich\Typo3MonitorApi\Exception\InvalidArgumentException;
-use HauerHeinrich\Typo3MonitorApi\OperationResult;
+use \TYPO3\CMS\Core\Database\ConnectionPool;
+use \TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use \TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
+use \TYPO3\CMS\Core\SingletonInterface;
+use \TYPO3\CMS\Core\Utility\GeneralUtility;
+use \TYPO3\CMS\Extbase\Object\ObjectManager;
+use \HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 /**
  *

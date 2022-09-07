@@ -8,12 +8,15 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
+ *
+ * Edited by www.hauer-heinrich.de
+ * @author
  */
 
-use TYPO3\CMS\Core\Configuration\Features;
-use TYPO3\CMS\Core\SingletonInterface;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use HauerHeinrich\Typo3MonitorApi\OperationResult;
+use \TYPO3\CMS\Core\Configuration\Features;
+use \TYPO3\CMS\Core\SingletonInterface;
+use \TYPO3\CMS\Core\Utility\GeneralUtility;
+use \HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 
 /**
@@ -31,6 +34,10 @@ class HasStrictSyntaxEnabled implements IOperation, SingletonInterface
      */
     public function execute(array $parameter = []): OperationResult
     {
-        return new OperationResult(true, [[ 'bool' => GeneralUtility::makeInstance(Features::class)->isFeatureEnabled('TypoScript.strictSyntax') ]]);
+        return new OperationResult(true, [
+            [
+                'bool' => GeneralUtility::makeInstance(Features::class)->isFeatureEnabled('TypoScript.strictSyntax')
+            ]
+        ]);
     }
 }

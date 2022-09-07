@@ -8,6 +8,9 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
+ *
+ * Edited by www.hauer-heinrich.de
+ * @author
  */
 
 use \TYPO3\CMS\Core\SingletonInterface;

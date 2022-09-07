@@ -3,11 +3,18 @@ declare(strict_types=1);
 
 namespace HauerHeinrich\Typo3MonitorApi\Utility;
 
-// use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Http\JsonResponse;
-use HauerHeinrich\Typo3MonitorApi\Domain\Model\User;
-use HauerHeinrich\Typo3MonitorApi\Utility\Route;
+/**
+ * This file is part of the "typo3_monitor_api" Extension for TYPO3 CMS.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE.txt file that was distributed with this source code.
+ */
+
+// use \TYPO3\CMS\Extbase\Utility\DebuggerUtility;
+use \TYPO3\CMS\Core\Utility\GeneralUtility;
+use \TYPO3\CMS\Core\Http\JsonResponse;
+use \HauerHeinrich\Typo3MonitorApi\Domain\Model\User;
+use \HauerHeinrich\Typo3MonitorApi\Utility\Route;
 
 class RoutingConfig {
     use \HauerHeinrich\Typo3MonitorApi\Utility\CheckBodyContent;

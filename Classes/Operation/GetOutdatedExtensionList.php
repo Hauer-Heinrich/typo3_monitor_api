@@ -8,14 +8,17 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
+ *
+ * Edited by www.hauer-heinrich.de
+ * @author
  */
 
-use TYPO3\CMS\Core\SingletonInterface;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
-use TYPO3\CMS\Extensionmanager\Domain\Model\Extension;
-use TYPO3\CMS\Extensionmanager\Utility\ListUtility;
-use HauerHeinrich\Typo3MonitorApi\OperationResult;
+use \TYPO3\CMS\Core\SingletonInterface;
+use \TYPO3\CMS\Core\Utility\GeneralUtility;
+use \TYPO3\CMS\Extbase\Object\ObjectManager;
+use \TYPO3\CMS\Extensionmanager\Domain\Model\Extension;
+use \TYPO3\CMS\Extensionmanager\Utility\ListUtility;
+use \HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 
 /**
@@ -90,5 +93,4 @@ class GetOutdatedExtensionList implements IOperation, SingletonInterface
 
         return new OperationResult(true);
     }
-
 }

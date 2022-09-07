@@ -8,12 +8,15 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
+ *
+ * Edited by www.hauer-heinrich.de
+ * @author
  */
 
-use TYPO3\CMS\Core\Core\Environment;
-use TYPO3\CMS\Core\SingletonInterface;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use HauerHeinrich\Typo3MonitorApi\OperationResult;
+use \TYPO3\CMS\Core\Core\Environment;
+use \TYPO3\CMS\Core\SingletonInterface;
+use \TYPO3\CMS\Core\Utility\GeneralUtility;
+use \HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 
 /**
@@ -40,8 +43,7 @@ class GetExtensionList implements IOperation, SingletonInterface
      * @param array $parameter Array of extension locations as string (system, global, local)
      * @return OperationResult The extension list
      */
-    public function execute(array $parameter = []): OperationResult
-    {
+    public function execute(array $parameter = []): OperationResult {
         if(empty($parameter['scopes'])) {
             $locations = $this->scopes;
         } else {
@@ -78,8 +80,7 @@ class GetExtensionList implements IOperation, SingletonInterface
      * @param string $scope
      * @return string
      */
-    protected function getPathForScope(string $scope): string
-    {
+    protected function getPathForScope(string $scope): string {
         switch ($scope) {
             case 'system':
                 if (version_compare(TYPO3_version, '9.0.0', '<')) {
@@ -108,8 +109,7 @@ class GetExtensionList implements IOperation, SingletonInterface
      * @param bool $withUpdateInfo
      * @return array
      */
-    protected function getExtensionListForScope(string $scope, bool $withUpdateInfo = false): array
-    {
+    protected function getExtensionListForScope(string $scope, bool $withUpdateInfo = false): array {
         $path = $this->getPathForScope($scope);
         $extensionInfo = [];
         if (is_dir($path)) {

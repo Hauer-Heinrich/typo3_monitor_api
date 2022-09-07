@@ -8,14 +8,17 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
+ *
+ * Edited by www.hauer-heinrich.de
+ * @author
  */
 
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use TYPO3\CMS\Core\SingletonInterface;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
-use HauerHeinrich\Typo3MonitorApi\OperationResult;
+use \TYPO3\CMS\Core\Database\ConnectionPool;
+use \TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use \TYPO3\CMS\Core\SingletonInterface;
+use \TYPO3\CMS\Core\Utility\GeneralUtility;
+use \TYPO3\CMS\Extbase\Object\ObjectManager;
+use \HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 
 /**
@@ -56,7 +59,7 @@ class GetLogResults implements IOperation, SingletonInterface
         $filter = $parameter['filter'];
 
         // how many entries should be returned.
-        $maxResults = 50;
+        $maxResults = 50\;
         if(isset($parameter['max'])) {
             $maxResults = intval($parameter['max']);
         }

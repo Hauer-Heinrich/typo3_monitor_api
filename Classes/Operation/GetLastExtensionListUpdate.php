@@ -8,17 +8,20 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
+ *
+ * Edited by www.hauer-heinrich.de
+ * @author
  */
 
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use TYPO3\CMS\Core\SingletonInterface;
-use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extensionmanager\Task\UpdateExtensionListTask;
-use TYPO3\CMS\Scheduler\Task\AbstractTask;
-use HauerHeinrich\Typo3MonitorApi\OperationResult;
-use HauerHeinrich\Typo3MonitorApi\Utility\FormatUtility;
+use \TYPO3\CMS\Core\Database\ConnectionPool;
+use \TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use \TYPO3\CMS\Core\SingletonInterface;
+use \TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use \TYPO3\CMS\Core\Utility\GeneralUtility;
+use \TYPO3\CMS\Extensionmanager\Task\UpdateExtensionListTask;
+use \TYPO3\CMS\Scheduler\Task\AbstractTask;
+use \HauerHeinrich\Typo3MonitorApi\OperationResult;
+use \HauerHeinrich\Typo3MonitorApi\Utility\FormatUtility;
 
 
 class GetLastExtensionListUpdate implements IOperation, SingletonInterface

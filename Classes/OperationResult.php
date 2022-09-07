@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace HauerHeinrich\Typo3MonitorApi;
 
@@ -7,6 +8,9 @@ namespace HauerHeinrich\Typo3MonitorApi;
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
+ *
+ * Edited by www.hauer-heinrich.de
+ * @author
  */
 
 

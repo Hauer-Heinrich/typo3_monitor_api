@@ -8,16 +8,19 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
+ *
+ * Edited by www.hauer-heinrich.de
+ * @author
  */
 
-use Psr\Http\Message\RequestFactoryInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use \Psr\Http\Message\RequestFactoryInterface;
+use \Psr\Http\Message\ServerRequestInterface;
 
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
-use TYPO3\CMS\Core\SingletonInterface;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Install\Controller\EnvironmentController;
-use HauerHeinrich\Typo3MonitorApi\OperationResult;
+// use \TYPO3\CMS\Extbase\Utility\DebuggerUtility;
+use \TYPO3\CMS\Core\SingletonInterface;
+use \TYPO3\CMS\Core\Utility\GeneralUtility;
+use \TYPO3\CMS\Install\Controller\EnvironmentController;
+use \HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 
 /**
@@ -228,7 +231,7 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
     }
 
     protected function initTSFE($typeNum = 0) {
-        $uid = 1; // TODO better not static value??!!
+        $uid = 1; // TODO: better not static value??!!
         $site = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Site\SiteFinder::class)->getSiteByRootPageId($uid);
         $GLOBALS['TYPO3_REQUEST'] = $this->request;
         $GLOBALS['TYPO3_REQUEST'] = $GLOBALS['TYPO3_REQUEST']->withAttribute('site', $site);

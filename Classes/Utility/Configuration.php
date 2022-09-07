@@ -10,16 +10,18 @@ namespace HauerHeinrich\Typo3MonitorApi\Utility;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
+use \TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use \TYPO3\CMS\Core\Utility\GeneralUtility;
+use \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
+use \TYPO3\CMS\Extbase\Object\ObjectManager;
 
 class Configuration {
 
     const EXTENSION_KEY = 'typo3_monitor_api';
 
     /**
+     * getExtConfiguration
+     *
      * @return array
      */
     public static function getExtConfiguration(): array {
