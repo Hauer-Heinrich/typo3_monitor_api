@@ -1,27 +1,33 @@
-## Installation
-### .htaccess
-SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+# typo3_monitor_api
+typo3_monitor_api is a TYPO3 extension.
 
-## Usage
-Basic Auth - UserName and UserPassword are from a backend user (you should create a own BE-user for the api, with no rights!)
+### Installation
+... like any other TYPO3 extension [extensions.typo3.org](https://extensions.typo3.org/ "TYPO3 Extension Repository")
+No TypoScript or PageTs required.
 
-domain.tld/typo3-monitor-api/v1/{METHOD}
+Setup a backend-user (username and password), this user don't need and shouldn't have any rights!!
+
+### Usage
+`domain.tld/typo3-monitor-api/v1/{METHOD}`
+If required add parameters to the request body as JSON format.
 
 #### Request
+Basic Auth - UserName and UserPassword are from a backend user.
 format: json (body)
 Example for method "GetExtensionVersion":
-´´´
+```json
 [
     {
         "extensionKey": "news"
     }
 ]
-´´´
+```
 
 #### Response
 format: json
-looks like (domain.tld/typo3-monitor-api/v1/GetPHPVersion):
-´´´
+Every response has at least "status", "value" and "message".
+Looks like (`domain.tld/typo3-monitor-api/v1/GetPHPVersion`):
+```json
 [
     {
         "status": true,
@@ -33,47 +39,48 @@ looks like (domain.tld/typo3-monitor-api/v1/GetPHPVersion):
         "message": ""
     }
 ]
-´´´
+```
 
 ### Methods
-CheckPathExists
-GetApplicationContext
-GetDatabaseAnalyzerSummary
-GetDatabaseVersion
-GetDiskSpace
-GetExtensionList
-GetExtensionVersion
-GetFeatureValue
-GetFileSpoolValue
-GetFilesystemChecksum
-GetInsecureExtensionList
-GetLastExtensionListUpdate
-GetLastSchedulerRun
-GetLogResults
-GetOpCacheStatus
-GetOutdatedExtensionList
-GetPHPVersion
-GetProgramVersion
-GetRecord
-GetRecords
-GetSystemInfos
-GetTYPO3Version
-GetTotalLogFilesSize
-HasDeprecationLogEnabled
-HasExtensionUpdate
-HasExtensionUpdateList
-HasFailedSchedulerTask
-HasForbiddenUsers
-HasMissingDefaultMailSettings
-HasRemainingUpdates
-HasSecurityUpdate
-HasStrictSyntaxEnabled
-HasUpdate
-IOperation
-UpdateMinorTypo3
+get all available methods: `domain.tld/typo3-monitor-api/v1/GetAllowedOperations`
+small list:
+- CheckPathExists
+- GetApplicationContext
+- GetDatabaseAnalyzerSummary
+- GetDatabaseVersion
+- GetDiskSpace
+- GetExtensionList
+- GetExtensionVersion
+- GetFeatureValue
+- GetFileSpoolValue
+- GetFilesystemChecksum
+- GetInsecureExtensionList
+- GetLastExtensionListUpdate
+- GetLastSchedulerRun
+- GetLogResults
+- GetOpCacheStatus
+- GetOutdatedExtensionList
+- GetPHPVersion
+- GetProgramVersion
+- GetRecord
+- GetRecords
+- GetSystemInfos
+- GetTYPO3Version
+- GetTotalLogFilesSize
+- HasDeprecationLogEnabled
+- HasExtensionUpdate
+- HasExtensionUpdateList
+- HasFailedSchedulerTask
+- HasForbiddenUsers
+- HasMissingDefaultMailSettings
+- HasRemainingUpdates
+- HasSecurityUpdate
+- HasStrictSyntaxEnabled
+- HasUpdate
+- IOperation
+- UpdateMinorTypo3
 
-### Options
-Extension configuration:
+### Extension configuration / settings
 - api-access.operations.allowedOperations:
     Allow or disallow specific methods
 - api-access.allowedIps:
@@ -86,3 +93,7 @@ Extension configuration:
 ### TODO:
 - add better Authentication
 - maybe en- decrypt data
+
+### Troubleshooting
+#### .htaccess
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
