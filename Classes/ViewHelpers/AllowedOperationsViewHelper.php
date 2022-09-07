@@ -11,35 +11,38 @@ namespace HauerHeinrich\Typo3MonitorApi\ViewHelpers;
  */
 
 // use \TYPO3\CMS\Extbase\Utility\DebuggerUtility;
+use \TYPO3\CMS\Core\Utility\GeneralUtility;
 use \TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 
 class AllowedOperationsViewHelper extends AbstractViewHelper {
 
     /**
-     * apiKey
+     * List all Operations
+     * Usage for example TYPO3 backend settings -> extension settings
      *
      * @param array $config
      * @param $const
      * @return string
      */
-    public function select(array $config, $const)
-    {
+    public function select(array $config, $const) {
         $extensionKey = 'typo3_monitor_api';
         // Typo3 extension manager gearwheel icon (ext_conf_template.txt)
         $extensionConfiguration = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][$extensionKey];
         $operations = $extensionConfiguration['operations'];
 
-        $extPath = \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath($extensionKey);
-        $fileNames = array_diff(scandir($extPath.'Classes/Operation/'), ['.', '..']);
+        $routingConfig = GeneralUtility::makeInstance(\HauerHeinrich\Typo3MonitorApi\Utility\RoutingConfig::class);
+        $allowedOperations = $routingConfig->getMethodsAllowed();
+
         $return = '
             <style>
                 #allowedOperations { display: grid; grid-template-columns: repeat(auto-fill, 20em); #allowedOperations .option label { margin-left: 5px; } }
             </style>
             <div id="allowedOperations">
         ';
-        foreach ($fileNames as $fileName) {
-            if(self::endsWith($fileName, '.php')) {
-                $cleardName = substr($fileName, 0, -4);
+
+        foreach ($allowedOperations as $key => $value) {
+            if(is_string($key) && is_array($value)) {
+                $cleardName = $key;
                 $checked = '';
                 $value = '';
                 if($operations[$cleardName] !== "0") {
@@ -58,20 +61,5 @@ class AllowedOperationsViewHelper extends AbstractViewHelper {
         $return .= '</div>';
 
         return $return;
-    }
-
-    /**
-     * endsWith
-     *
-     * @param string $haystack
-     * @param string $needle
-     * @return boolean
-     */
-    static function endsWith(string $haystack, string $needle ): bool {
-        $length = strlen( $needle );
-        if( !$length ) {
-            return true;
-        }
-        return substr( $haystack, -$length ) === $needle;
     }
 }

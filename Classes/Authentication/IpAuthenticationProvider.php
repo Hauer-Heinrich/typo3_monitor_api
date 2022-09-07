@@ -10,8 +10,8 @@ namespace HauerHeinrich\Typo3MonitorApi\Authentication;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
-use HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
+// use \TYPO3\CMS\Extbase\Utility\DebuggerUtility;
+use \HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
 
 class IpAuthenticationProvider
 {

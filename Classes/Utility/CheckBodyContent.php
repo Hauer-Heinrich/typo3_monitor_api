@@ -10,8 +10,7 @@ namespace HauerHeinrich\Typo3MonitorApi\Utility;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
-use HauerHeinrich\Typo3MonitorApi\OperationResult;
+// use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 
 trait CheckBodyContent {
 
@@ -23,26 +22,22 @@ trait CheckBodyContent {
 
     protected $bodyContentArray = [];
 
-    public function checkBodyContent(\TYPO3\CMS\Core\Http\ServerRequest $request): bool {
+    /**
+     * checkBodyContentForValidJson
+     * checks if \TYPO3\CMS\Core\Http\ServerRequest body is valid json string
+     *
+     * @param \TYPO3\CMS\Core\Http\ServerRequest $request
+     * @return boolean
+     */
+    public function checkBodyContentForValidJson(\TYPO3\CMS\Core\Http\ServerRequest $request): bool {
         // Check if given body is empty or valid json string
         $body = $request->getBody();
         $bodyContent = $body->getContents();
-        if(empty($bodyContent) || $this->isJson($bodyContent)) {
-            $this->bodyContentArray = json_decode($bodyContent, null, 512, JSON_OBJECT_AS_ARRAY);
-            foreach($this->bodyContentArray as $contentKey => $contentValue) {
-                if(!array_key_exists($contentKey, $this->allowedParameter)) {
-                    $this->errors['bodyContent'] = 'bodyContent not valid!';
-                    return false;
-                }
-
-                if(gettype($contentValue) !== $this->allowedParameter[$contentKey]) {
-                    $this->errors['bodyContent'] = 'bodyContent not valid!';
-                    return false;
-                }
-            }
+        if($this->isJson($bodyContent)) {
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -54,5 +49,14 @@ trait CheckBodyContent {
         json_decode($string);
 
         return json_last_error() === JSON_ERROR_NONE;
+    }
+
+    public function getArrayFromBodyJson(\TYPO3\CMS\Core\Http\ServerRequest $request): array {
+        if($this->checkBodyContentForValidJson($request)) {
+            $bodyContent = $request->getBody()->getContents();
+            return json_decode($bodyContent, null, 512, JSON_OBJECT_AS_ARRAY);
+        }
+
+        return [];
     }
 }

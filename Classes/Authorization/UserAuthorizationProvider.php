@@ -10,7 +10,7 @@ namespace HauerHeinrich\Typo3MonitorApi\Authorization;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
+// use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use HauerHeinrich\Typo3MonitorApi\Domain\Model\User;
 use HauerHeinrich\Typo3MonitorApi\Utility\Configuration;

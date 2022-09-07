@@ -50,9 +50,16 @@ class GetLogResults implements IOperation, SingletonInterface
      */
     public function execute(array $parameter = []): OperationResult
     {
+        if(!isset($parameter['filter'])) {
+            return new OperationResult(false, [], 'Error no param filter set!');
+        }
         $filter = $parameter['filter'];
-        // how many entries should be returned. Has to be > 0
-        $maxResults = intval($parameter['max']);
+
+        // how many entries should be returned.
+        $maxResults = 50;
+        if(isset($parameter['max'])) {
+            $maxResults = intval($parameter['max']);
+        }
 
         $type = -1;
         $error = -1;

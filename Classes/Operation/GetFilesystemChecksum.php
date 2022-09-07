@@ -67,7 +67,7 @@ class GetFilesystemChecksum implements IOperation, SingletonInterface
      * @param string $path absolute or relative path or EXT:foobar/
      * @return string empty if path is invalid, else the absolute path
      */
-    protected function getPath($path)
+    protected function getPath(string $path): string
     {
         if (substr($path, -1) === '/') {
             $path = substr($path, 0, -1);

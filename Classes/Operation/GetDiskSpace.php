@@ -31,8 +31,8 @@ class GetDiskSpace implements IOperation, SingletonInterface
         $path = !empty($parameter['path']) ? $parameter['path'] : '/';
 
         if((bool)$parameter['format'] === true) {
-            $total = \HauerHeinrich\Typo3MonitorApi\Utility\FormatUtility::formatBytes(disk_total_space($path));
-            $free = \HauerHeinrich\Typo3MonitorApi\Utility\FormatUtility::formatBytes(disk_free_space($path));
+            $total = \HauerHeinrich\Typo3MonitorApi\Utility\FormatUtility::getHumanReadableSize(disk_total_space($path));
+            $free = \HauerHeinrich\Typo3MonitorApi\Utility\FormatUtility::getHumanReadableSize(disk_free_space($path));
         } else {
             $total = disk_total_space($path);
             $free = disk_free_space($path);

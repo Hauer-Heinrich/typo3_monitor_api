@@ -10,6 +10,7 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  * LICENSE.txt file that was distributed with this source code.
  */
 
+// use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use HauerHeinrich\Typo3MonitorApi\OperationResult;
@@ -33,20 +34,20 @@ class GetExtensionVersion implements IOperation, SingletonInterface
             return new OperationResult(false, [], 'No extensionKey set!');
         }
 
-        if($parameter['extensionKey'] === '') {
+        $extensionKey = $parameter['extensionKey'];
+
+        if(empty($extensionKey)) {
             return new OperationResult(false, [], 'ExtensionKey empty!');
         }
-
-        $extensionKey = $parameter['extensionKey'];
 
         if (!ExtensionManagementUtility::isLoaded($extensionKey)) {
             return new OperationResult(false, [], 'Extension [' . $extensionKey . '] is not loaded');
         }
 
-        include(ExtensionManagementUtility::extPath($extensionKey, 'ext_emconf.php'));
+        $extensionVersion = ExtensionManagementUtility::getExtensionVersion($extensionKey);
 
-        if (is_array($EM_CONF[$extensionKey])) {
-            return new OperationResult(true, [[ 'version' => $EM_CONF[$extensionKey]['version'] ]]);
+        if (!empty($extensionVersion)) {
+            return new OperationResult(true, [[ 'version' => $extensionVersion ]]);
         }
 
         return new OperationResult(false, [], 'Cannot read EM_CONF for extension [' . $extensionKey . ']');

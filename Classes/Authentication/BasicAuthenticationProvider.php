@@ -10,18 +10,14 @@ namespace HauerHeinrich\Typo3MonitorApi\Authentication;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
+// use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\PasswordHashFactory;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Connection;
 use HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
 use HauerHeinrich\Typo3MonitorApi\Domain\Model\User;
-use TYPO3\CMS\Core\Html\RteHtmlParser;
-use TYPO3Fluid\Fluid\ViewHelpers\DebugViewHelper;
 
-class BasicAuthenticationProvider
-{
+class BasicAuthenticationProvider {
     private $data = [];
 
     /**
@@ -60,8 +56,7 @@ class BasicAuthenticationProvider
      * @param string $name
      * @return void
      */
-    public function validateRequestUserName(string $name): void
-    {
+    public function validateRequestUserName(string $name): void {
         if(empty($name)) {
             $this->data[]['message'] = 'Username wrong!';
         }
@@ -73,8 +68,7 @@ class BasicAuthenticationProvider
      * @param string $password
      * @return void
      */
-    public function validateRequestUserPassword(string $password): void
-    {
+    public function validateRequestUserPassword(string $password): void {
         if(empty($password)) {
             $this->data[]['message'] = 'Userpassword wrong!';
         }
@@ -86,8 +80,7 @@ class BasicAuthenticationProvider
      * @param \HauerHeinrich\Typo3MonitorApi\Domain\Model\User $user
      * @return void
      */
-    public function authUser(\HauerHeinrich\Typo3MonitorApi\Domain\Model\User $user): void
-    {
+    public function authUser(\HauerHeinrich\Typo3MonitorApi\Domain\Model\User $user): void {
         if(empty($user->getUserName()) && empty($user->getUserPassword())) {
             $this->data[]['message'] = 'Username or password not set!';
             return;
@@ -106,7 +99,7 @@ class BasicAuthenticationProvider
             ->execute()->fetch();
 
         if(empty($dbUser)) {
-            $this->data[]['message'] = 'No DB user found!';
+            $this->data[]['message'] = 'No user found!';
             return;
         }
 
@@ -122,8 +115,7 @@ class BasicAuthenticationProvider
      *
      * @return boolean
      */
-    public function isValid(): bool
-    {
+    public function isValid(): bool {
         return $this->isValid;
     }
 
@@ -132,8 +124,7 @@ class BasicAuthenticationProvider
      *
      * @return array
      */
-    public function getLogData(): array
-    {
+    public function getLogData(): array {
         return $this->data;
     }
 }

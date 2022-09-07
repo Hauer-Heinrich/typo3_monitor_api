@@ -38,37 +38,40 @@ class GetFileSpoolValue implements IOperation, SingletonInterface
             return new OperationResult(false, [], 'mail transport_spool_filepath // spool_file_path not set = null!');
         }
 
-        if ($value === 'pending') {
-            $count = 0;
-            $filePath = GeneralUtility::getFileAbsFileName($filePath);
-            foreach (new \DirectoryIterator($filePath) as $file) {
-                if ($file->getExtension() === 'message') {
-                    $count += 1;
+        switch ($value) {
+            case 'pending':
+                $count = 0;
+                $filePath = GeneralUtility::getFileAbsFileName($filePath);
+                foreach (new \DirectoryIterator($filePath) as $file) {
+                    if ($file->getExtension() === 'message') {
+                        $count += 1;
+                    }
                 }
-            }
-            return new OperationResult(true, [[ 'data' => $count ]]);
-        }
+                return new OperationResult(true, [[ 'data' => $count ]]);
+                break;
+            case 'sending':
+                $count = 0;
+                $filePath = GeneralUtility::getFileAbsFileName($filePath);
+                foreach (new \DirectoryIterator($filePath) as $file) {
+                    if ($file->getExtension() === 'sending') {
+                        $count += 1;
+                    }
+                }
+                return new OperationResult(true, [[ 'data' => $count ]]);
+                break;
+            case 'lag':
+                $age = 0;
+                $filePath = GeneralUtility::getFileAbsFileName($filePath);
+                foreach (new \DirectoryIterator($filePath) as $file) {
+                    if ($file->isDot() === false) {
+                        $age = max($age, time() - $file->getMTime());
+                    }
+                }
+                return new OperationResult(true, [[ 'data' => $age ]]);
+                break;
 
-        if ($value === 'sending') {
-            $count = 0;
-            $filePath = GeneralUtility::getFileAbsFileName($filePath);
-            foreach (new \DirectoryIterator($filePath) as $file) {
-                if ($file->getExtension() === 'sending') {
-                    $count += 1;
-                }
-            }
-            return new OperationResult(true, [[ 'data' => $count ]]);
-        }
-
-        if ($value === 'lag') {
-            $age = 0;
-            $filePath = GeneralUtility::getFileAbsFileName($filePath);
-            foreach (new \DirectoryIterator($filePath) as $file) {
-                if ($file->isDot() === false) {
-                    $age = max($age, time() - $file->getMTime());
-                }
-            }
-            return new OperationResult(true, [[ 'data' => $age ]]);
+            default:
+                break;
         }
 
         throw new \InvalidArgumentException('Parameter value not set or invalid');

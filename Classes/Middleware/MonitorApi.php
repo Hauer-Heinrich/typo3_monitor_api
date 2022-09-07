@@ -10,7 +10,7 @@ namespace HauerHeinrich\Typo3MonitorApi\Middleware;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use \TYPO3\CMS\Extbase\Utility\DebuggerUtility;
+// use \TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -59,6 +59,7 @@ class MonitorApi implements MiddlewareInterface {
                             list($apiUserName, $apiUserPassword) = explode(':', base64_decode(substr($auth_token, 6)));
                         }
                     }
+
                 }
 
                 if(!empty($apiUserName) && !empty($apiUserPassword)) {
@@ -67,9 +68,9 @@ class MonitorApi implements MiddlewareInterface {
                     // User Authentication
                     $basicAuth = new BasicAuthenticationProvider($request, $user);
                     $isUserAuthenticated = $basicAuth->isValid();
-
                     if($isUserAuthenticated) {
-                        return \HauerHeinrich\Typo3MonitorApi\Utility\RoutingConfig::setRoutingConfigs($request, $user);
+                        $routingConfig = GeneralUtility::makeInstance(\HauerHeinrich\Typo3MonitorApi\Utility\RoutingConfig::class);
+                        return $routingConfig->setRoutingConfigs($request, $user);
                     }
                 }
 

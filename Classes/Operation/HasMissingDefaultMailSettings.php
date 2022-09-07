@@ -10,7 +10,7 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
+// use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use TYPO3\CMS\Core\SingletonInterface;
 use HauerHeinrich\Typo3MonitorApi\OperationResult;
 
@@ -19,27 +19,13 @@ use HauerHeinrich\Typo3MonitorApi\OperationResult;
  * Check if strict syntax is enabled
  *
  */
-class HasMissingDefaultMailSettings implements IOperation, SingletonInterface
-{
-    use \HauerHeinrich\Typo3MonitorApi\Utility\CheckBodyContent;
-
-    public function __construct() {
-        $this->allowedParameter = ['test' => 'array', 'install' => boolean, 'blubb' => integer];
-    }
-
+class HasMissingDefaultMailSettings implements IOperation, SingletonInterface {
     /**
      *
      * @param array $parameter None
      * @return OperationResult
      */
-    public function execute(array $parameter = []): OperationResult
-    {
-        $checkBody = $this->checkBodyContent($parameter['request']);
-
-        if($checkBody === false) {
-            return new OperationResult(true, [ $this->errors ], 'bodyContent not valid! Value-type or key wrong / not allowed!');
-        }
-
+    public function execute(array $parameter = []): OperationResult {
         if (empty($GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailFromAddress'])) {
             $this->errors['defaultMailFromAddress']= 'defaultMailFromAddress';
         } else {
