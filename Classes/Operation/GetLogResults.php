@@ -59,7 +59,7 @@ class GetLogResults implements IOperation, SingletonInterface
         $filter = $parameter['filter'];
 
         // how many entries should be returned.
-        $maxResults = 50\;
+        $maxResults = 50;
         if(isset($parameter['max'])) {
             $maxResults = intval($parameter['max']);
         }
