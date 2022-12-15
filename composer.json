@@ -16,16 +16,18 @@
         "docs": "https://github.com/Hauer-Heinrich/typo3_monitor_api/blob/master/README.md"
     },
     "version": "1.1.3",
-    "license": "GPL-2.0",
-    "keywords": ["TYPO3 CMS", "extension", "hauer-heinrich"],
+    "license": ["GPL-2.0-or-later"],
+    "keywords": [
+        "TYPO3 CMS",
+        "extension",
+        "hauer-heinrich"
+    ],
     "replace": {
         "hauer-heinrich/typo3_monitor_api": "self.version",
         "typo3-ter/typo3_monitor_api": "self.version"
     },
     "require": {
         "typo3/cms-core": "^10.4.0 || ^11.5.0"
-    },
-    "suggest": {
     },
     "autoload": {
         "psr-4": {
