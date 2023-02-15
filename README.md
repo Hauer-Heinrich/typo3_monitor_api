@@ -80,7 +80,7 @@ small list:
 - HasStrictSyntaxEnabled
 - HasUpdate
 - IOperation
-- UpdateMinorTypo3
+- UpdateMinorTypo3 (HttpMethod: PATCH)
 
 ### Extension configuration / settings
 - api-access.operations.allowedOperations:
