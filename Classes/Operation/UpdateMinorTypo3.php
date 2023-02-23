@@ -22,7 +22,6 @@ use \TYPO3\CMS\Core\Utility\GeneralUtility;
 use \TYPO3\CMS\Install\Controller\EnvironmentController;
 use \HauerHeinrich\Typo3MonitorApi\OperationResult;
 
-
 /**
  *
  */
@@ -38,7 +37,7 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
     /**
      * @var ServerRequestInterface
      */
-    private ServerRequestInterface $request;
+    private $request;
 
     /**
      * @var EnvironmentController
@@ -56,10 +55,8 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
      * @param array $parameter None
      * @return OperationResult
      */
-    public function execute(array $parameter = []): OperationResult
-    {
+    public function execute(array $parameter = []): OperationResult {
         $this->request = $parameter['request'];
-        $this->initTSFE();
 
         /** @var \TYPO3\CMS\Install\Controller\UpgradeController $upgradeController */
         $upgradeController = GeneralUtility::makeInstance(\TYPO3\CMS\Install\Controller\UpgradeController::class);
@@ -101,31 +98,35 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
                                         $typo3SourcePath = readlink('typo3_src');
                                         $typo3Typo3Path = readlink('typo3');
                                         $typo3IndexPath = readlink('index.php');
-                                        $applicationContext = GeneralUtility::makeInstance(\HauerHeinrich\Typo3MonitorApi\Operation\GetApplicationContext::class)->execute()->getValue();
-                                        $siteBase = '';
-                                        $siteBaseVariants = $GLOBALS['TYPO3_REQUEST']->getAttribute('site')->getConfiguration()['baseVariants'];
-                                        foreach ($siteBaseVariants as $value) {
-                                            if($value['condition'] == 'applicationContext == '.$applicationContext) {
-                                                $siteBase = $value['base'];
-                                            }
-                                        }
-
-                                        if(empty($siteBase)) {
-                                            $siteBase = $GLOBALS['TYPO3_REQUEST']->getAttribute('site')->getConfiguration()['base'];
-                                        }
 
                                         $coreUpdateActivate = $this->checkUpdateResponse($upgradeController->coreUpdateActivateAction($this->request));
                                         if($coreUpdateActivate['success']) {
-                                            if($this->checkWebsiteStatusCode($siteBase)) {
-                                                return new OperationResult(true, [true], 'Website returns statusCode 200, it should be fine!');
-                                            }
-
-                                            if($this->createTypo3Symlinks($typo3SourcePath, $typo3Typo3Path, $typo3IndexPath)) {
-                                                if($this->checkWebsiteStatusCode($siteBase)) {
+                                            if(!empty($this->request->getAttribute('normalizedParams'))) {
+                                                $requestHost = $this->request->getAttribute('normalizedParams')->getRequestHost();
+                                                if($this->checkWebsiteStatusCode($requestHost)) {
                                                     return new OperationResult(true, [true], 'Website returns statusCode 200, it should be fine!');
                                                 }
 
-                                                return new OperationResult(true, [], 'coreUpdateActivate failed! Can not create symlinks!');
+                                                $hasUpdateClass = GeneralUtility::makeInstance(\HauerHeinrich\Typo3MonitorApi\Operation\HasUpdate::class);
+                                                $hasUpdate = $hasUpdateClass->execute();
+                                                $hasUpdateValue = $hasUpdate->getValue();
+
+                                                if(!isset($hasUpdateValue[0]['version'])) {
+                                                    return new OperationResult(true, [true], "Can't get new versions number! (hasUpdateValue)");
+                                                }
+
+                                                $typo3SourceDirectory = dirname($typo3SourcePath);
+                                                $newTypo3SourcePath = $typo3SourceDirectory . '/typo3_src-' . $hasUpdateValue[0]['version'];
+
+                                                if($this->createTypo3Symlinks($newTypo3SourcePath, $typo3Typo3Path, $typo3IndexPath)) {
+                                                    if($this->checkWebsiteStatusCode($requestHost)) {
+                                                        return new OperationResult(true, [true], 'Website returns statusCode 200, it should be fine!');
+                                                    }
+
+                                                    return new OperationResult(true, [], 'coreUpdateActivate failed! CheckWebsiteStatusCode after symlinks broken!');
+                                                } else {
+                                                    return new OperationResult(true, [], 'coreUpdateActivate failed! Can not create symlinks!');
+                                                }
                                             }
 
                                             return new OperationResult(true, [], 'coreUpdateActivate failed!');
@@ -217,34 +218,19 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
      * @param string $indexPath
      * @return bool
      */
-    public function createTypo3Symlinks(string $sourcePath, string $typo3Path = 'typo3_src/typo3', string $indexPath = 'typo3_src/index.php')
-    {
+    public function createTypo3Symlinks(string $sourcePath, string $typo3Path = 'typo3_src/typo3/', string $indexPath = 'typo3_src/index.php') {
+        unlink('typo3_src');
+        unlink('index.php');
+        unlink('typo3');
+
         if(symlink($sourcePath, 'typo3_src')) {
             if(symlink($typo3Path, 'typo3')) {
-                if(symlink($indexPath, 'index')) {
+                if(symlink($indexPath, 'index.php')) {
                     return true;
                 }
             }
         }
 
         return false;
-    }
-
-    protected function initTSFE($typeNum = 0) {
-        $uid = 1; // TODO: better not static value??!!
-        $site = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Site\SiteFinder::class)->getSiteByRootPageId($uid);
-        $GLOBALS['TYPO3_REQUEST'] = $this->request;
-        $GLOBALS['TYPO3_REQUEST'] = $GLOBALS['TYPO3_REQUEST']->withAttribute('site', $site);
-        $GLOBALS['TYPO3_REQUEST'] = $GLOBALS['TYPO3_REQUEST']->withAttribute('language', $site->getLanguageById(0));
-        $GLOBALS['TSFE']->id = $uid;
-
-        // BREAKING: TODO: don't work at TYPO3 >= 11
-        /** @var TypoScriptFrontendController $GLOBALS['TSFE'] */
-        $GLOBALS['TSFE'] = GeneralUtility::makeInstance(
-            \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController::class,
-            $GLOBALS['TYPO3_CONF_VARS'],
-            $uid,
-            $typeNum
-        );
     }
 }
