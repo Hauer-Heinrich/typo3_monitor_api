@@ -23,22 +23,32 @@ use \HauerHeinrich\Typo3MonitorApi\OperationResult;
  * @author Tobias Liebig <tobias.liebig@typo3.org>
  *
  */
-class GetDiskSpace implements IOperation, SingletonInterface
-{
+class GetDiskSpace implements IOperation, SingletonInterface {
+
     /**
      * @param array $parameter
      * @return OperationResult
      */
-    public function execute(array $parameter = []): OperationResult
-    {
+    public function execute(array $parameter = []): OperationResult {
         $path = !empty($parameter['path']) ? $parameter['path'] : '/';
 
         if((bool)$parameter['format'] === true) {
             $total = \HauerHeinrich\Typo3MonitorApi\Utility\FormatUtility::getHumanReadableSize(disk_total_space($path));
             $free = \HauerHeinrich\Typo3MonitorApi\Utility\FormatUtility::getHumanReadableSize(disk_free_space($path));
-        } else {
+
+            return new OperationResult(true, [[
+                'total' => $total,
+                'free' => $free,
+            ]]);
+        }
+
+        try {
             $total = disk_total_space($path);
             $free = disk_free_space($path);
+        } catch (\Throwable $th) {
+            // TODO: log this
+            $total = 0;
+            $free = 0;
         }
 
         return new OperationResult(true, [[
