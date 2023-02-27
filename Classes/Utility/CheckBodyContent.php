@@ -23,24 +23,6 @@ trait CheckBodyContent {
     protected $bodyContentArray = [];
 
     /**
-     * checkBodyContentForValidJson
-     * checks if \TYPO3\CMS\Core\Http\ServerRequest body is valid json string
-     *
-     * @param \TYPO3\CMS\Core\Http\ServerRequest $request
-     * @return boolean
-     */
-    public function checkBodyContentForValidJson(\TYPO3\CMS\Core\Http\ServerRequest $request): bool {
-        // Check if given body is empty or valid json string
-        $body = $request->getBody();
-        $bodyContent = $body->getContents();
-        if($this->isJson($bodyContent)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
      * Check if given string is valid json
      * @param string $string
      * @return bool
@@ -60,11 +42,14 @@ trait CheckBodyContent {
      * @return array
      */
     public function getArrayFromBodyJson(\TYPO3\CMS\Core\Http\ServerRequest $request): array {
-        if($this->checkBodyContentForValidJson($request)) {
-            $bodyContent = $request->getBody()->getContents();
+        $body = $request->getBody();
+        $bodyContent = $body->getContents();
+
+        if($this->isJson($bodyContent)) {
             return json_decode($bodyContent, null, 512, JSON_OBJECT_AS_ARRAY);
         }
 
+        // TODO: log this no valid json given
         return [];
     }
 }

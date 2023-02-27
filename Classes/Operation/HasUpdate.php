@@ -76,7 +76,7 @@ class HasUpdate implements IOperation, SingletonInterface
                 if (strpos($response->getHeaderLine('Content-Type'), 'application/json') === 0) {
                     $content = json_decode($response->getBody()->getContents(), true);
                     if(version_compare($currentTypo3Version, $content['version'])) {
-                        return new OperationResult(false, [[ 'bool' => true ]], 'Update available ('.$content['version'].')');
+                        return new OperationResult(false, [[ 'bool' => true, 'version' => $content['version'] ]], 'Update available ('.$content['version'].')');
                     }
 
                     return new OperationResult(true, [[ 'bool' => false ]], 'No updates available.');

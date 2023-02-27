@@ -28,15 +28,13 @@ class RoutingConfig {
         $this->setMethodsAllowed();
     }
 
-    public function setAllowedHttpMethods(): void
-    {
+    public function setAllowedHttpMethods(): void {
         $this->allowedHttpMethods = [
             'GET', 'POST', 'PATCH'
         ];
     }
 
-    public function getAllowedHttpMethods(): array
-    {
+    public function getAllowedHttpMethods(): array {
         return $this->allowedHttpMethods;
     }
 
@@ -121,7 +119,9 @@ class RoutingConfig {
             ],
             'UpdateMinorTypo3' => [
                 'httpMethod' => 'PATCH',
-                'parameters' => [],
+                'parameters' => [
+                    'request'
+                ],
             ],
         ];
     }
@@ -185,16 +185,15 @@ class RoutingConfig {
             $params['request'] = $request;
 
             if(!empty($params['request'])) {
-                $params['queryParams'] = $params['request']->getQueryParams();
                 $bodyArray = $this->getArrayFromBodyJson($params['request']);
 
                 if(\is_array($bodyArray)) {
-                    $params['body'] = $bodyArray;
-
                     // check if given parameters are allowed
                     if($this->areMethodOptionsValid($methodName, $bodyArray)) {
+                        $params['body'] = $bodyArray;
+
                         $class = GeneralUtility::makeInstance($classNameSpace);
-                        $resultJSON = json_encode([$class->execute($bodyArray)->toArray()]);
+                        $resultJSON = json_encode([$class->execute($params)->toArray()]);
 
                         $response = $response->withStatus(200, 'allowed');
                         $response->getBody()->write($resultJSON);

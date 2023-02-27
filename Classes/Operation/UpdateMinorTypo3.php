@@ -101,6 +101,7 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
 
                                         $coreUpdateActivate = $this->checkUpdateResponse($upgradeController->coreUpdateActivateAction($this->request));
                                         if($coreUpdateActivate['success']) {
+
                                             if(!empty($this->request->getAttribute('normalizedParams'))) {
                                                 $requestHost = $this->request->getAttribute('normalizedParams')->getRequestHost();
                                                 if($this->checkWebsiteStatusCode($requestHost)) {
