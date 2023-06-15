@@ -28,14 +28,8 @@ class GetTYPO3Version implements IOperation, SingletonInterface
      */
     public function execute(array $parameter = []): OperationResult
     {
-        // @deprecated will work with TYPO3 10 and 11 "TYPO3_version"
-        // @see https://docs.typo3.org/c/typo3/cms-core/master/en-us/Changelog/10.3/Deprecation-90007-GlobalConstantsTYPO3_versionAndTYPO3_branch.html
-        if (!defined('TYPO3_version')) {
-            $typo3version = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Information\Typo3Version::class);
-            $version = $typo3version->getVersion();
-        } else {
-            $version = TYPO3_version;
-        }
+        $typo3version = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Information\Typo3Version::class);
+        $version = $typo3version->getVersion();
 
         return new OperationResult(true, [[ 'version' => $version ]]);
     }

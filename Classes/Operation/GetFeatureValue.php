@@ -66,9 +66,6 @@ class GetFeatureValue implements IOperation, SingletonInterface
                 $feature = GeneralUtility::makeInstance(MailFeature::class);
                 break;
             case 'passwordhashing':
-                if (version_compare(TYPO3_version, '9.0.0', '<')) {
-                    return new OperationResult(false, [], 'TYPO3 version to old for \'passwordhashing\'!');
-                }
                 /** @var PasswordHashingFeature $feature */
                 $feature = GeneralUtility::makeInstance(PasswordHashingFeature::class);
                 break;

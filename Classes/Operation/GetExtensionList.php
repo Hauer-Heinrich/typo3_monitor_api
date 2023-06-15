@@ -83,19 +83,11 @@ class GetExtensionList implements IOperation, SingletonInterface
     protected function getPathForScope(string $scope): string {
         switch ($scope) {
             case 'system':
-                if (version_compare(TYPO3_version, '9.0.0', '<')) {
-                    $path = PATH_typo3 . 'sysext/';
-                } else {
-                    $path = Environment::getPublicPath() . '/typo3/sysext/';
-                }
+                $path = Environment::getPublicPath() . '/typo3/sysext/';
                 break;
             case 'local':
             default:
-                if (version_compare(TYPO3_version, '9.0.0', '<')) {
-                    $path = PATH_typo3conf . 'ext/';
-                } else {
-                    $path = Environment::getPublicPath() . '/typo3conf/ext/';
-                }
+                $path = Environment::getPublicPath() . '/typo3conf/ext/';
                 break;
         }
 

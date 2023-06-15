@@ -25,18 +25,8 @@ class Configuration {
      * @return array
      */
     public static function getExtConfiguration(): array {
-        if (version_compare(TYPO3_version, '9.0.0', '>=')) {
-            return GeneralUtility::makeInstance(ExtensionConfiguration::class)
-                ->get(self::EXTENSION_KEY);
-        }
-
-        if (isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][self::EXTENSION_KEY])) {
-            $extensionConfiguration = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][self::EXTENSION_KEY]);
-
-            return $extensionConfiguration;
-        }
-
-        return [];
+        return GeneralUtility::makeInstance(ExtensionConfiguration::class)
+            ->get(self::EXTENSION_KEY);
     }
 
 

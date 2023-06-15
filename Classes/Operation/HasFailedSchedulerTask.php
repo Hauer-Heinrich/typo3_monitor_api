@@ -41,11 +41,9 @@ class HasFailedSchedulerTask implements IOperation, SingletonInterface
                 $queryBuilder->expr()->neq('lastexecution_failure', $queryBuilder->createNamedParameter(''))
             );
 
-        if (version_compare(TYPO3_version, '9.0.0', '>=')) {
-            $queryBuilder->andWhere(
-                $queryBuilder->expr()->eq('deleted', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT))
-            );
-        }
+        $queryBuilder->andWhere(
+            $queryBuilder->expr()->eq('deleted', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT))
+        );
 
         $count = $queryBuilder->execute()->fetchColumn(0);
 

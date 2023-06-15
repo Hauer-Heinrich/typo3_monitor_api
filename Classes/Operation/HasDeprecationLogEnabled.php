@@ -40,7 +40,6 @@ class HasDeprecationLogEnabled implements IOperation, SingletonInterface
      */
     public function execute(array $parameter = []): OperationResult
     {
-
         $errorHandlerErrors = $GLOBALS['TYPO3_CONF_VARS']['SYS']['errorHandlerErrors'];
 
         $levels = [];
