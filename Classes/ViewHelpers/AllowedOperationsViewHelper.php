@@ -45,7 +45,7 @@ class AllowedOperationsViewHelper extends AbstractViewHelper {
                 $cleardName = $key;
                 $checked = '';
                 $value = '';
-                if($operations[$cleardName] !== "0") {
+                if(array_key_exists($cleardName, $operations) && $operations[$cleardName] !== "0") {
                     $checked = 'checked';
                     $value = 1;
                 }
