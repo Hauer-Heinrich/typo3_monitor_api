@@ -225,7 +225,11 @@ class RoutingConfig {
      * @return boolean
      */
     public function areMethodOptionsValid(string $method, array $methodParameters = []): bool {
-        $allowedMethodParameters = array_key_exists($method, $this->methodsAllowed) ? $this->methodsAllowed[$method]['parameters'] : [];
+        $allowedMethodParameters = [];
+        if(array_key_exists($method, $this->methodsAllowed) && isset($this->methodsAllowed[$method]['parameters'])) {
+            $allowedMethodParameters = $this->methodsAllowed[$method]['parameters'];
+        }
+
         if(empty($allowedMethodParameters) && !empty($methodParameters)) {
             return false;
         }

@@ -111,14 +111,9 @@ class GetExtensionList implements IOperation, SingletonInterface
                     $extensionInfo[$extKey]['ext_key'] = $extKey;
                     $extensionInfo[$extKey]['installed'] = (bool)\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded($extKey);
 
-                    if (is_file($path . $extKey . '/ext_emconf.php')) {
-                        include($path . $extKey . '/ext_emconf.php');
-                        $extensionVersion = $EM_CONF[$extKey]['version'];
-                    } else {
-                        $extensionVersion = false;
-                    }
+                    $extensionVersion = \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getExtensionVersion($extKey);
 
-                    if ($extensionVersion) {
+                    if (!empty($extensionVersion)) {
                         $extensionInfo[$extKey]['version'] = $extensionVersion;
                         $extensionInfo[$extKey]['scope'][$scope] = $extensionVersion;
                     }

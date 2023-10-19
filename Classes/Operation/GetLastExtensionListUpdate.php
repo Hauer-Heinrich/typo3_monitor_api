@@ -30,7 +30,10 @@ class GetLastExtensionListUpdate implements IOperation, SingletonInterface
     public function execute(array $parameter = []): OperationResult
     {
         // Should be the extensionmanager repository used?
-        $useExtensionListRepo = empty((bool)$parameter['extensionlist']) ? false : true;
+        $useExtensionListRepo = true;
+        if(array_key_exists('extensionlist', $parameter) && empty((bool)$parameter['extensionlist'])) {
+            $useExtensionListRepo = false;
+        }
 
         if ($useExtensionListRepo) {
             $result = $this->getExtensionListLastUpdate();
@@ -75,16 +78,15 @@ class GetLastExtensionListUpdate implements IOperation, SingletonInterface
      */
     public function getExtensionListLastUpdate(): int
     {
-        /** @var QueryBuilder $queryBuilder */
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getQueryBuilderForTable('tx_extensionmanager_domain_model_repository');
-        $queryBuilder->getRestrictions()->removeAll();
-        $result = $queryBuilder->select('last_update')
-            ->from('tx_extensionmanager_domain_model_repository')
-            ->execute()->fetch();
-
-        if(!empty($result) && is_array($result)) {
-            return $result['last_update'];
+        try {
+            $connection = GeneralUtility::makeInstance(ConnectionPool::class)
+                ->getConnectionForTable('tx_extensionmanager_domain_model_extension');
+            $resultSet = $connection->query("SELECT UPDATE_TIME FROM information_schema.tables WHERE TABLE_SCHEMA = 'bavaria_pferdesport' AND TABLE_NAME = 'tx_extensionmanager_domain_model_extension'")->fetchOne();
+            if(!empty($resultSet) && is_string($resultSet)) {
+                return $resultSet;
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
         }
 
         return 0;

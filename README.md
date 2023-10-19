@@ -99,3 +99,7 @@ small list:
 ### Troubleshooting
 #### .htaccess
 SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+
+#### API Request Error
+- Unable to call method "getQueryParams" of non-object "request".
+  -> mostly this comes from TypoScript Conditions like `[traverse(request.getQueryParams(), 'tx_news_pi1/action') == 'detail']` then check the availablitiy of the "request object" too, like `[request && traverse(request.getQueryParams(), 'tx_news_pi1/action') == 'detail']`!

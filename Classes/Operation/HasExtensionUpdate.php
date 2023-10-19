@@ -33,7 +33,7 @@ class HasExtensionUpdate implements IOperation, SingletonInterface
      */
     public function execute(array $parameter = []): OperationResult
     {
-        if (!isset($parameter['extensionKey'])) {
+        if (!array_key_exists('extensionKey', $parameter) || !isset($parameter['extensionKey'])) {
             // throw new InvalidArgumentException('no extensionKey set');
             return new OperationResult(false, [], 'Param \'extensionKey\' not set!');
         }

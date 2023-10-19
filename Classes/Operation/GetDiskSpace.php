@@ -32,7 +32,7 @@ class GetDiskSpace implements IOperation, SingletonInterface {
     public function execute(array $parameter = []): OperationResult {
         $path = !empty($parameter['path']) ? $parameter['path'] : '/';
 
-        if((bool)$parameter['format'] === true) {
+        if(array_key_exists('format', $parameter) && (bool)$parameter['format'] === true) {
             $total = \HauerHeinrich\Typo3MonitorApi\Utility\FormatUtility::getHumanReadableSize(disk_total_space($path));
             $free = \HauerHeinrich\Typo3MonitorApi\Utility\FormatUtility::getHumanReadableSize(disk_free_space($path));
 

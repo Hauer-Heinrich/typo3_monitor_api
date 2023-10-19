@@ -33,6 +33,10 @@ class GetOpCacheStatus implements IOperation, SingletonInterface
         $opCacheService = GeneralUtility::makeInstance(OpcodeCacheService::class);
 
         $allActive = $opCacheService->getAllActive();
-        return new OperationResult(true, [[ 'OPcache' => [$allActive['OPcache']] ]]);
+        if(array_key_exists('OPcache', $allActive)) {
+            return new OperationResult(true, [[ 'OPcache' => [$allActive['OPcache']] ]]);
+        }
+
+        return new OperationResult(true, [[ 'OPcache' => [false] ]]);
     }
 }
