@@ -50,8 +50,6 @@ class HasExtensionUpdate implements IOperation, SingletonInterface
 
         /** @var ListUtility $listUtility */
         $listUtility = GeneralUtility::makeInstance(ListUtility::class);
-        \TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump($listUtility->getAvailableAndInstalledExtensionsWithAdditionalInformation());
-        die();
         $extensionInformation = $listUtility->getAvailableAndInstalledExtensionsWithAdditionalInformation();
 
         if (isset($extensionInformation[$extensionKey]['updateAvailable'])) {

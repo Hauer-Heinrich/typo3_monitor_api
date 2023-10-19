@@ -33,7 +33,7 @@ class HasExtensionUpdateList implements IOperation, SingletonInterface
      */
     public function execute(array $parameter = []): OperationResult
     {
-        $scope = $parameter['scope'];
+        $scope = isset($parameter['scope']) ? $parameter['scope'] : '';
 
         /** @var ListUtility $listUtility */
         $listUtility = GeneralUtility::makeInstance(ListUtility::class);
