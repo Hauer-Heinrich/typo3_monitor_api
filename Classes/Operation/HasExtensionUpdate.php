@@ -16,7 +16,6 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
 use \TYPO3\CMS\Core\SingletonInterface;
 use \TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use \TYPO3\CMS\Core\Utility\GeneralUtility;
-use \TYPO3\CMS\Extbase\Object\ObjectManager;
 use \TYPO3\CMS\Extensionmanager\Utility\ListUtility;
 use \HauerHeinrich\Typo3MonitorApi\OperationResult;
 
@@ -50,7 +49,9 @@ class HasExtensionUpdate implements IOperation, SingletonInterface
         }
 
         /** @var ListUtility $listUtility */
-        $listUtility = GeneralUtility::makeInstance(ObjectManager::class)->get(ListUtility::class);
+        $listUtility = GeneralUtility::makeInstance(ListUtility::class);
+        \TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump($listUtility->getAvailableAndInstalledExtensionsWithAdditionalInformation());
+        die();
         $extensionInformation = $listUtility->getAvailableAndInstalledExtensionsWithAdditionalInformation();
 
         if (isset($extensionInformation[$extensionKey]['updateAvailable'])) {

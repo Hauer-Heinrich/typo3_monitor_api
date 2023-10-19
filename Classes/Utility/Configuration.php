@@ -13,7 +13,6 @@ namespace HauerHeinrich\Typo3MonitorApi\Utility;
 use \TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use \TYPO3\CMS\Core\Utility\GeneralUtility;
 use \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
-use \TYPO3\CMS\Extbase\Object\ObjectManager;
 
 class Configuration {
 
@@ -36,8 +35,7 @@ class Configuration {
      * @return array
      */
     public static function getTypoScriptConfiguration(): array {
-        $configurationManager = GeneralUtility::makeInstance(ObjectManager::class)
-            ->get(ConfigurationManagerInterface::class);
+        $configurationManager = GeneralUtility::makeInstance(ConfigurationManagerInterface::class);
 
         return $configurationManager->getConfiguration(
             ConfigurationManagerInterface::CONFIGURATION_TYPE_FRAMEWORK,

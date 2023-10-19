@@ -20,7 +20,6 @@ use \TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use \TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
 use \TYPO3\CMS\Core\SingletonInterface;
 use \TYPO3\CMS\Core\Utility\GeneralUtility;
-use \TYPO3\CMS\Extbase\Object\ObjectManager;
 use \HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 /**
@@ -44,7 +43,7 @@ class HasForbiddenUsers implements IOperation, SingletonInterface
         $usernames = explode(',', htmlspecialchars(strip_tags(trim($parameter['usernames'])), ENT_QUOTES, "UTF-8"));
 
         /** @var QueryBuilder $queryBuilder */
-        $queryBuilder = GeneralUtility::makeInstance(ObjectManager::class)->get(ConnectionPool::class)->getQueryBuilderForTable('be_users');
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('be_users');
         $queryBuilder
             ->getRestrictions()
             ->removeByType(HiddenRestriction::class);

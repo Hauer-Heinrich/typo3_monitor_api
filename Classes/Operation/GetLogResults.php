@@ -17,7 +17,6 @@ use \TYPO3\CMS\Core\Database\ConnectionPool;
 use \TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use \TYPO3\CMS\Core\SingletonInterface;
 use \TYPO3\CMS\Core\Utility\GeneralUtility;
-use \TYPO3\CMS\Extbase\Object\ObjectManager;
 use \HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 
@@ -94,7 +93,7 @@ class GetLogResults implements IOperation, SingletonInterface
         }
 
         /** @var QueryBuilder $queryBuilder */
-        $queryBuilder = GeneralUtility::makeInstance(ObjectManager::class)->get(ConnectionPool::class)->getQueryBuilderForTable('sys_log');
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_log');
         $queryBuilder->resetRestrictions();
 
         if($maxResults > 0) {
