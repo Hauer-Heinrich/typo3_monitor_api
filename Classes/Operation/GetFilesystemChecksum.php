@@ -15,6 +15,7 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
 
 use \TYPO3\CMS\Core\SingletonInterface;
 use \TYPO3\CMS\Core\Utility\GeneralUtility;
+use \TYPO3\CMS\Core\Core\Environment;
 use \HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 /**
@@ -122,7 +123,7 @@ class GetFilesystemChecksum implements IOperation, SingletonInterface {
                 list($checksum, $md5sOfSubfolder) = $this->getFolderChecksum($path . '/' . $entry);
                 $md5s = array_merge($md5s, $md5sOfSubfolder);
             } else {
-                $relPath = str_replace(PATH_site, '', $path . '/' . $entry);
+                $relPath = str_replace(Environment::getPublicPath(), '', $path . '/' . $entry);
                 $md5s[$relPath] = $this->getFileChecksum($path . '/' . $entry);
             }
         }
