@@ -64,8 +64,6 @@ small list:
 - GetOutdatedExtensionList
 - GetPHPVersion
 - GetProgramVersion
-- GetRecord
-- GetRecords
 - GetSystemInfos
 - GetTYPO3Version
 - GetTotalLogFilesSize
@@ -77,7 +75,6 @@ small list:
 - HasMissingDefaultMailSettings
 - HasRemainingUpdates
 - HasSecurityUpdate
-- HasStrictSyntaxEnabled
 - HasUpdate
 - IOperation
 - UpdateMinorTypo3 (HttpMethod: PATCH)
