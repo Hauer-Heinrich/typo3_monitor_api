@@ -53,7 +53,7 @@ class RoutingConfig {
             ],
             'GetExtensionList' => [
                 'parameters' => [
-                    'scopes' => '', // (optional) possibilities: system, local
+                    'scopes' => 'string', // (optional) possibilities: system, local
                     'withUpdateInfo' => 'boolean' // (optional)
                 ]
             ],
@@ -190,10 +190,10 @@ class RoutingConfig {
                 if(\is_array($bodyArray)) {
                     // check if given parameters are allowed
                     if($this->areMethodOptionsValid($methodName, $bodyArray)) {
-                        $params['body'] = $bodyArray;
+                        // $params['body'] = $bodyArray;
 
                         $class = GeneralUtility::makeInstance($classNameSpace);
-                        $resultJSON = json_encode([$class->execute($params)->toArray()]);
+                        $resultJSON = json_encode([$class->execute($bodyArray)->toArray()]);
 
                         $response = $response->withStatus(200, 'allowed');
                         $response->getBody()->write($resultJSON);

@@ -36,7 +36,7 @@ class GetExtensionList implements IOperation, SingletonInterface
     /**
      * @var array Available extension scopes
      */
-    protected $scopes = ['system', 'local'];
+    protected $scopes = ['system', 'local', 'simple-system', 'simple-local'];
 
     /**
      *
@@ -51,7 +51,7 @@ class GetExtensionList implements IOperation, SingletonInterface
         }
 
         $withUpdateInfo = false;
-        if($parameter['withUpdateInfo'] === '1') {
+        if(isset($parameter['withUpdateInfo']) && $parameter['withUpdateInfo'] === '1') {
             $withUpdateInfo = true;
         }
 
@@ -83,9 +83,11 @@ class GetExtensionList implements IOperation, SingletonInterface
     protected function getPathForScope(string $scope): string {
         switch ($scope) {
             case 'system':
+            case 'simple-system':
                 $path = Environment::getPublicPath() . '/typo3/sysext/';
                 break;
             case 'local':
+            case 'simple-local':
             default:
                 $path = Environment::getPublicPath() . '/typo3conf/ext/';
                 break;
@@ -106,6 +108,10 @@ class GetExtensionList implements IOperation, SingletonInterface
         $extensionInfo = [];
         if (is_dir($path)) {
             $extensionFolders = \TYPO3\CMS\Core\Utility\GeneralUtility::get_dirs($path);
+            if(\str_starts_with($scope, 'simple-')) {
+                return $extensionFolders;
+            }
+
             if (is_array($extensionFolders)) {
                 foreach ($extensionFolders as $extKey) {
                     $extensionInfo[$extKey]['ext_key'] = $extKey;
