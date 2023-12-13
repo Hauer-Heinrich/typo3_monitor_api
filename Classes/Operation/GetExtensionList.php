@@ -36,7 +36,7 @@ class GetExtensionList implements IOperation, SingletonInterface
     /**
      * @var array Available extension scopes
      */
-    protected $scopes = ['system', 'local'];
+    protected $scopes = ['system', 'local', 'simple-system', 'simple-local'];
 
     /**
      *
@@ -51,7 +51,7 @@ class GetExtensionList implements IOperation, SingletonInterface
         }
 
         $withUpdateInfo = false;
-        if($parameter['withUpdateInfo'] === '1') {
+        if(isset($parameter['withUpdateInfo']) && $parameter['withUpdateInfo'] === '1') {
             $withUpdateInfo = true;
         }
 
@@ -83,19 +83,13 @@ class GetExtensionList implements IOperation, SingletonInterface
     protected function getPathForScope(string $scope): string {
         switch ($scope) {
             case 'system':
-                if (version_compare(TYPO3_version, '9.0.0', '<')) {
-                    $path = PATH_typo3 . 'sysext/';
-                } else {
-                    $path = Environment::getPublicPath() . '/typo3/sysext/';
-                }
+            case 'simple-system':
+                $path = Environment::getPublicPath() . '/typo3/sysext/';
                 break;
             case 'local':
+            case 'simple-local':
             default:
-                if (version_compare(TYPO3_version, '9.0.0', '<')) {
-                    $path = PATH_typo3conf . 'ext/';
-                } else {
-                    $path = Environment::getPublicPath() . '/typo3conf/ext/';
-                }
+                $path = Environment::getPublicPath() . '/typo3conf/ext/';
                 break;
         }
 
@@ -115,6 +109,10 @@ class GetExtensionList implements IOperation, SingletonInterface
         if (is_dir($path)) {
             $extensionFolders = \TYPO3\CMS\Core\Utility\GeneralUtility::get_dirs($path);
             if (is_array($extensionFolders)) {
+                if(substr($scope, 0, 7) === "simple-") {
+                    return $extensionFolders;
+                }
+
                 foreach ($extensionFolders as $extKey) {
                     $extensionInfo[$extKey]['ext_key'] = $extKey;
                     $extensionInfo[$extKey]['installed'] = (bool)\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded($extKey);
