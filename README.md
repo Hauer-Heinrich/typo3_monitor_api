@@ -96,6 +96,9 @@ small list:
 ### Troubleshooting
 #### .htaccess
 SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+or
+RewriteEngine On
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
 #### API Request Error
 - Unable to call method "getQueryParams" of non-object "request".
