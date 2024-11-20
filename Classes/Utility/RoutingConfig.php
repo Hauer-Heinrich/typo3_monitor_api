@@ -119,9 +119,7 @@ class RoutingConfig {
             ],
             'UpdateMinorTypo3' => [
                 'httpMethod' => 'PATCH',
-                'parameters' => [
-                    'request'
-                ],
+                'parameters' => [],
             ],
         ];
     }
@@ -192,7 +190,7 @@ class RoutingConfig {
                     if($this->areMethodOptionsValid($methodName, $bodyArray)) {
                         // $params['body'] = $bodyArray;
 
-                        $class = GeneralUtility::makeInstance($classNameSpace);
+                        $class = GeneralUtility::makeInstance($classNameSpace, $params['request']);
                         $resultJSON = json_encode([$class->execute($bodyArray)->toArray()]);
 
                         $response = $response->withStatus(200, 'allowed');

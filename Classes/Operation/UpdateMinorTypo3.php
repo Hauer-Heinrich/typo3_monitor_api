@@ -44,8 +44,9 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
      */
     protected EnvironmentController $environmentController;
 
-    public function __construct(RequestFactoryInterface $requestFactory) {
-        $this->requestFactory = $requestFactory;
+    public function __construct(\TYPO3\CMS\Core\Http\ServerRequest $request) {
+        $this->request = $request;
+        $this->requestFactory = GeneralUtility::makeInstance(RequestFactoryInterface::class);
         $this->environmentController = GeneralUtility::makeInstance(EnvironmentController::class);
         $this->allowedParameter = [];
     }
@@ -56,8 +57,6 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
      * @return OperationResult
      */
     public function execute(array $parameter = []): OperationResult {
-        $this->request = $parameter['request'];
-
         /** @var \TYPO3\CMS\Install\Controller\UpgradeController $upgradeController */
         $upgradeController = GeneralUtility::makeInstance(\TYPO3\CMS\Install\Controller\UpgradeController::class);
 
