@@ -72,7 +72,7 @@ class HasSecurityUpdate implements IOperation, SingletonInterface
                 if (strpos($response->getHeaderLine('Content-Type'), 'application/json') === 0) {
                     $content = json_decode($response->getBody()->getContents(), true);
 
-                    if(version_compare($currentTypo3Version, $content['version'])) {
+                    if(version_compare($currentTypo3Version, $content['version'], '<')) {
                         return new OperationResult(true, [[ 'bool' => true, 'version' => $content['version'] ]], 'Security update available ('.$content['version'].')');
                     }
 
