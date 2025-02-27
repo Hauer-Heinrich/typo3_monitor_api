@@ -11,8 +11,7 @@ $EM_CONF['typo3_monitor_api'] = [
     'version' => '1.5.0',
     'constraints' => [
         'depends' => [
-            'typo3' => '12.4.0-13.4.99',
-            'webhooks' => '12.4.0-13.4.99',
+            'typo3' => '12.4.0-13.4.99'
         ],
         'conflicts' => [],
         'suggests' => []
