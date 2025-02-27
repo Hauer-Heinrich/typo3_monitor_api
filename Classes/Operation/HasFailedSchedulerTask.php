@@ -45,7 +45,7 @@ class HasFailedSchedulerTask implements IOperation, SingletonInterface
             $queryBuilder->expr()->eq('deleted', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT))
         );
 
-        $count = $queryBuilder->execute()->fetchColumn(0);
+        $count = $queryBuilder->executeQuery()->fetchOne();
 
         return new OperationResult(true, [[ 'data' => $count > 0 ]]);
     }

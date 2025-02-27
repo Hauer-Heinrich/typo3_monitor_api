@@ -13,16 +13,12 @@ namespace HauerHeinrich\Typo3MonitorApi\Authentication;
 // use \TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 use \HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
 
-class IpAuthenticationProvider
-{
+class IpAuthenticationProvider {
     /**
      * checkIpAddress
      * check if given ip-address or ip-range is allowed
-     *
-     * @param \TYPO3\CMS\Core\Http\ServerRequest $request
-     * @return void
      */
-    static public function checkIpAddress(\TYPO3\CMS\Core\Http\ServerRequest $request) {
+    static public function checkIpAddress(\TYPO3\CMS\Core\Http\ServerRequest $request): bool {
         $config = Configuration::getExtConfiguration();
 
         if(is_array($config) && array_key_exists('allowedIps', $config) && is_string($config['allowedIps']) && $config['allowedIps'] !== '*') {

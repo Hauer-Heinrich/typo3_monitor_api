@@ -61,8 +61,8 @@ class HasForbiddenUsers implements IOperation, SingletonInterface
 
         return new OperationResult(true, [
             [
-                'bool' => $queryBuilder->execute()->rowCount() > 0,
-                'users' => $queryBuilder->execute()->fetchAll()
+                'bool' => $queryBuilder->executeQuery()->rowCount() > 0,
+                'users' => $queryBuilder->executeQuery()->fetchAllAssociative()
             ]
         ]);
     }

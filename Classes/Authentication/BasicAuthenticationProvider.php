@@ -96,7 +96,7 @@ class BasicAuthenticationProvider {
             ->where(
                 $queryBuilder->expr()->eq('username', $queryBuilder->createNamedParameter($user->getUserName()))
             )
-            ->execute()->fetch();
+            ->executeQuery()->fetchAssociative();
 
         if(empty($dbUser)) {
             $this->data[]['message'] = 'No user found!';

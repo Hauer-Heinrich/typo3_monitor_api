@@ -15,7 +15,7 @@
         "source": "https://github.com/Hauer-Heinrich/typo3_monitor_api",
         "docs": "https://github.com/Hauer-Heinrich/typo3_monitor_api/blob/master/README.md"
     },
-    "version": "1.4.1",
+    "version": "1.5.0",
     "license": ["GPL-2.0-or-later"],
     "keywords": [
         "TYPO3 CMS",
@@ -26,7 +26,8 @@
         "typo3-ter/typo3-monitor-api": "self.version"
     },
     "require": {
-        "typo3/cms-core": "^12.4.0"
+        "typo3/cms-core": "^12.4.0 || ^13.4.0",
+        "typo3/cms-webhooks": "^12.4.0 || ^13.4.0"
     },
     "autoload": {
         "psr-4": {

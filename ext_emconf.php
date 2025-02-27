@@ -8,10 +8,11 @@ $EM_CONF['typo3_monitor_api'] = [
     'author_company' => 'Hauer-Heinrich.de',
     'state' => 'beta',
     'clearCacheOnLoad' => true,
-    'version' => '1.4.1',
+    'version' => '1.5.0',
     'constraints' => [
         'depends' => [
-            'typo3' => '12.4.0-12.4.99'
+            'typo3' => '12.4.0-13.4.99',
+            'webhooks' => '12.4.0-13.4.99',
         ],
         'conflicts' => [],
         'suggests' => []

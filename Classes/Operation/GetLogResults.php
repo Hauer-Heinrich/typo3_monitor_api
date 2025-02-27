@@ -134,9 +134,9 @@ class GetLogResults implements IOperation, SingletonInterface
         }
 
         if($maxResults > 0) {
-            $log = $queryBuilder->execute()->fetchAll();
+            $log = $queryBuilder->executeQuery()->fetchAllAssociative();
         } else {
-            $log = $queryBuilder->execute()->rowCount();
+            $log = $queryBuilder->executeQuery()->rowCount();
         }
 
         if($log < 1) {
