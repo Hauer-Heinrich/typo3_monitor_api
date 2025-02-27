@@ -72,9 +72,9 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
 
                     if(!empty($folderStructureStatusContent['errorStatus'])) {
                         try {
-                            $this->environmentController->folderStructureFixAction();
+                            $this->environmentController->folderStructureFixAction($this->request);
                         } catch (\Throwable $th) {
-                            return new OperationResult(false, [[ 'exception' => $th ]]);
+                            return new OperationResult(false, [[ 'message' => 'UpdateMinorTypo3 -> folderStructureFixAction() not working correctly!', 'exception' => $th ]]);
                         }
                     }
 
