@@ -100,6 +100,19 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
 
                                         $coreUpdateActivate = $this->checkUpdateResponse($upgradeController->coreUpdateActivateAction($this->request));
                                         if($coreUpdateActivate['success']) {
+                                            $hasUpdateClass = GeneralUtility::makeInstance(\HauerHeinrich\Typo3MonitorApi\Operation\HasUpdate::class);
+                                            $hasUpdate = $hasUpdateClass->execute();
+                                            $hasUpdateValue = $hasUpdate->getValue();
+
+                                            $typo3SourceDirectory = dirname($typo3SourcePath);
+                                            $newTypo3SourcePath = $typo3SourceDirectory . '/typo3_src-' . $hasUpdateValue[0]['version'];
+                                            if($typo3SourcePath !== $newTypo3SourcePath) {
+                                                if($this->createTypo3Symlinks($newTypo3SourcePath, $typo3Typo3Path, $typo3IndexPath)) {
+                                                    return new OperationResult(true, [], 'Symlinks has manually set, please check if website is running!');
+                                                } else {
+                                                    return new OperationResult(true, [], 'coreUpdateActivate failed! Can not create symlinks!');
+                                                }
+                                            }
 
                                             if(!empty($this->request->getAttribute('normalizedParams'))) {
                                                 $requestHost = $this->request->getAttribute('normalizedParams')->getRequestHost();
@@ -107,16 +120,9 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
                                                     return new OperationResult(true, [true], 'Website returns statusCode 200, it should be fine!');
                                                 }
 
-                                                $hasUpdateClass = GeneralUtility::makeInstance(\HauerHeinrich\Typo3MonitorApi\Operation\HasUpdate::class);
-                                                $hasUpdate = $hasUpdateClass->execute();
-                                                $hasUpdateValue = $hasUpdate->getValue();
-
                                                 if(!isset($hasUpdateValue[0]['version'])) {
                                                     return new OperationResult(true, [true], "Can't get new versions number! (hasUpdateValue)");
                                                 }
-
-                                                $typo3SourceDirectory = dirname($typo3SourcePath);
-                                                $newTypo3SourcePath = $typo3SourceDirectory . '/typo3_src-' . $hasUpdateValue[0]['version'];
 
                                                 if($this->createTypo3Symlinks($newTypo3SourcePath, $typo3Typo3Path, $typo3IndexPath)) {
                                                     if($this->checkWebsiteStatusCode($requestHost)) {
