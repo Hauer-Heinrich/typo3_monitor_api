@@ -11,6 +11,21 @@ class AllowedOperationsViewHelper extends AbstractViewHelper {
     protected $escapeOutput = false;
 
     /**
+     * Entry point for the extension configuration (ext_conf_template.txt):
+     * type=user[HauerHeinrich\Typo3MonitorApi\ViewHelpers\AllowedOperationsViewHelper->select]
+     *
+     * Called by GeneralUtility::callUserFunction() with the field parameters
+     * and the calling object, both of which are not needed here.
+     *
+     * @param array $params
+     * @param object|null $ref
+     * @return string
+     */
+    public function select(array $params = [], ?object $ref = null): string {
+        return $this->render();
+    }
+
+    /**
      * List all Operations
      * Usage for example TYPO3 backend settings -> extension settings
      *
