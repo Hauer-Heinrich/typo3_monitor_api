@@ -53,17 +53,14 @@ class AllowedOperationsViewHelper extends AbstractViewHelper {
             if(is_string($key) && is_array($value)) {
                 $clearName = $key;
                 $checked = '';
-                $fieldValue = '0';
 
                 if(array_key_exists($clearName, $operations) && $operations[$clearName] !== "0") {
                     $checked = 'checked';
-                    $fieldValue = '1';
                 }
 
                 $return .= '
                     <div class="option">
-                        <input type="hidden" name="operations.'.$clearName.'" value="0">
-                        <input type="checkbox" id="'.$clearName.'" name="operations.'.$clearName.'" value="'.$fieldValue.'" '.$checked.'>
+                        <input type="checkbox" id="'.$clearName.'" name="operations.'.$clearName.'" value="1" '.$checked.'>
                         <label for="'.$clearName.'">'.$clearName.'</label>
                     </div>';
             }

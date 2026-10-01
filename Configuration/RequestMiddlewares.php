@@ -7,10 +7,11 @@ return [
             'before' => [
                 'typo3/cms-redirects/redirecthandler',
                 'typo3/cms-frontend/base-redirect-resolver',
-                'typo3/cms-frontend/static-route-resolver'
+                'typo3/cms-frontend/static-route-resolver',
             ],
             'after' => [
-                'typo3/cms-frontend/authentication'
+                'typo3/cms-frontend/authentication',
+                'typo3/cms-frontend/site',
             ]
         ],
     ]

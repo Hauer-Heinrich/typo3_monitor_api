@@ -9,3 +9,6 @@ blockTime = 5
 
 # cat=api-access/enable; type=integer; label=how often a request may take place before it is blocked
 maxCount = 3
+
+# cat=api-access/enable; type=boolean; label=Response debug: output / return debug and error messages
+debugOutput =
