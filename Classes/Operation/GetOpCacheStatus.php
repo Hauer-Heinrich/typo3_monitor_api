@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace HauerHeinrich\Typo3MonitorApi\Operation;
 
 /**
- * This file is part of the "zabbix_client" Extension for TYPO3 CMS.
+ * This file is part of the "typo3_monitor_api" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
@@ -13,26 +13,25 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  * @author
  */
 
-use \TYPO3\CMS\Core\Service\OpcodeCacheService;
-use \TYPO3\CMS\Core\SingletonInterface;
-use \TYPO3\CMS\Core\Utility\GeneralUtility;
-use \HauerHeinrich\Typo3MonitorApi\OperationResult;
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Service\OpcodeCacheService;
+use HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 
-class GetOpCacheStatus implements IOperation, SingletonInterface
-{
+class GetOpCacheStatus implements IOperation {
+    public function __construct(
+        private readonly OpcodeCacheService $opcodeCacheService,
+    ) {}
+
     /**
      * Get the current database version
      *
      * @param array $parameter None
      * @return OperationResult the current database version
      */
-    public function execute(array $parameter = []): OperationResult
-    {
-        /** @var OpcodeCacheService $opCacheService */
-        $opCacheService = GeneralUtility::makeInstance(OpcodeCacheService::class);
+    public function execute(array $parameter, ServerRequestInterface $request): OperationResult {
+        $allActive = $this->opcodeCacheService->getAllActive();
 
-        $allActive = $opCacheService->getAllActive();
         if(array_key_exists('OPcache', $allActive)) {
             return new OperationResult(true, [[ 'OPcache' => [$allActive['OPcache']] ]]);
         }

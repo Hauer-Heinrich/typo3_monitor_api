@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace HauerHeinrich\Typo3MonitorApi\Operation;
 
 /**
- * This file is part of the "zabbix_client" Extension for TYPO3 CMS.
+ * This file is part of the "typo3_monitor_api" Extension for TYPO3 CMS.
  * Modified by www.hauer-heinrich.de
  *
  * For the full copyright and license information, please read the
@@ -14,27 +14,24 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  * @author
  */
 
-// use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
-use \TYPO3\CMS\Core\Database\ConnectionPool;
-use \TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use \TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
-use \TYPO3\CMS\Core\SingletonInterface;
-use \TYPO3\CMS\Core\Utility\GeneralUtility;
-use \HauerHeinrich\Typo3MonitorApi\OperationResult;
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use TYPO3\CMS\Core\Database\Query\Restriction\HiddenRestriction;
+use HauerHeinrich\Typo3MonitorApi\OperationResult;
 
-/**
- *
- */
-class HasForbiddenUsers implements IOperation, SingletonInterface
-{
+class HasForbiddenUsers implements IOperation {
+
+    public function __construct(
+        private readonly ConnectionPool $connectionPool,
+    ) {}
 
     /**
      *
      * @param array $parameter None
      * @return OperationResult
      */
-    public function execute(array $parameter = []): OperationResult
-    {
+    public function execute(array $parameter, ServerRequestInterface $request): OperationResult {
         if (!isset($parameter['usernames']) || empty($parameter['usernames'])) {
             // throw new InvalidArgumentException('no usernames set');
             return new OperationResult(false, [], 'Error no param usernames set!');
@@ -43,7 +40,7 @@ class HasForbiddenUsers implements IOperation, SingletonInterface
         $usernames = explode(',', htmlspecialchars(strip_tags(trim($parameter['usernames'])), ENT_QUOTES, "UTF-8"));
 
         /** @var QueryBuilder $queryBuilder */
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('be_users');
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable('be_users');
         $queryBuilder
             ->getRestrictions()
             ->removeByType(HiddenRestriction::class);
@@ -59,10 +56,13 @@ class HasForbiddenUsers implements IOperation, SingletonInterface
             $queryBuilder->expr()->eq('be_users.disable', 1)
         );
 
+        // Query once (previously executed twice; rowCount() is not reliable for SELECT)
+        $users = $queryBuilder->executeQuery()->fetchAllAssociative();
+
         return new OperationResult(true, [
             [
-                'bool' => $queryBuilder->executeQuery()->rowCount() > 0,
-                'users' => $queryBuilder->executeQuery()->fetchAllAssociative()
+                'bool' => $users !== [],
+                'users' => $users,
             ]
         ]);
     }

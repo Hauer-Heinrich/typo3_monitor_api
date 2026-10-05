@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace HauerHeinrich\Typo3MonitorApi\Operation;
 
 /**
- * This file is part of the "zabbix_client" Extension for TYPO3 CMS.
+ * This file is part of the "typo3_monitor_api" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
@@ -13,26 +13,22 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  * @author
  */
 
-use \Psr\Http\Message\RequestFactoryInterface;
-use \Psr\Http\Message\ServerRequestInterface;
-
-// use \TYPO3\CMS\Extbase\Utility\DebuggerUtility;
-use \TYPO3\CMS\Core\SingletonInterface;
-use \TYPO3\CMS\Core\Utility\GeneralUtility;
-use \TYPO3\CMS\Install\Controller\EnvironmentController;
-use \HauerHeinrich\Typo3MonitorApi\OperationResult;
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Http\RequestFactory;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Install\Controller\EnvironmentController;
+use HauerHeinrich\Typo3MonitorApi\Service\MonitorCache;
+use HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 /**
  *
  */
-class UpdateMinorTypo3 implements IOperation, SingletonInterface
-{
-    use \HauerHeinrich\Typo3MonitorApi\Utility\CheckBodyContent;
-
+class UpdateMinorTypo3 implements IOperation {
     /**
-     * @var RequestFactoryInterface
+     * @var RequestFactory
      */
-    private RequestFactoryInterface $requestFactory;
+    private RequestFactory $requestFactory;
 
     /**
      * @var ServerRequestInterface
@@ -44,11 +40,12 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
      */
     protected EnvironmentController $environmentController;
 
-    public function __construct(\TYPO3\CMS\Core\Http\ServerRequest $request) {
-        $this->request = $request;
-        $this->requestFactory = GeneralUtility::makeInstance(RequestFactoryInterface::class);
-        $this->environmentController = GeneralUtility::makeInstance(EnvironmentController::class);
-        $this->allowedParameter = [];
+    public function __construct(
+        RequestFactory $requestFactory,
+        private readonly HasUpdate $hasUpdate,
+        private readonly MonitorCache $cache,
+    ) {
+        $this->requestFactory = $requestFactory;
     }
 
     /**
@@ -56,7 +53,14 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
      * @param array $parameter None
      * @return OperationResult
      */
-    public function execute(array $parameter = []): OperationResult {
+    public function execute(array $parameter, ServerRequestInterface $request): OperationResult {
+        // EXT:install is optional, so its controllers are fetched lazily
+        if (!ExtensionManagementUtility::isLoaded('install')) {
+            return new OperationResult(false, [], 'EXT:install not loaded!');
+        }
+        $this->request = $request;
+        $this->environmentController = GeneralUtility::makeInstance(EnvironmentController::class);
+
         /** @var \TYPO3\CMS\Install\Controller\UpgradeController $upgradeController */
         $upgradeController = GeneralUtility::makeInstance(\TYPO3\CMS\Install\Controller\UpgradeController::class);
 
@@ -74,7 +78,7 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
                         try {
                             $this->environmentController->folderStructureFixAction($this->request);
                         } catch (\Throwable $th) {
-                            return new OperationResult(false, [[ 'message' => 'UpdateMinorTypo3 -> folderStructureFixAction() not working correctly!', 'exception' => $th ]]);
+                            return new OperationResult(false, [[ 'message' => 'UpdateMinorTypo3 -> folderStructureFixAction() not working correctly!', 'exception' => $th->getMessage() ]]);
                         }
                     }
 
@@ -100,8 +104,9 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
 
                                         $coreUpdateActivate = $this->checkUpdateResponse($upgradeController->coreUpdateActivateAction($this->request));
                                         if($coreUpdateActivate['success']) {
-                                            $hasUpdateClass = GeneralUtility::makeInstance(\HauerHeinrich\Typo3MonitorApi\Operation\HasUpdate::class);
-                                            $hasUpdate = $hasUpdateClass->execute();
+                                            // Cached release/update information is outdated now
+                                            $this->cache->flush();
+                                            $hasUpdate = $this->hasUpdate->execute([], $this->request);
                                             $hasUpdateValue = $hasUpdate->getValue();
 
                                             $typo3SourceDirectory = dirname($typo3SourcePath);
@@ -153,7 +158,7 @@ class UpdateMinorTypo3 implements IOperation, SingletonInterface
                         return new OperationResult(true, $coreUpdateDownload);
                     }
 
-                    return new OperationResult(true, [], 'Can\'t check pre conditions (no or wrong response)! Request status code: '. $checkPreConditions->getStatusCode());
+                    return new OperationResult(true, [], 'Can\'t check pre conditions (no or wrong response)! Request status code: '. ($checkPreConditions['status'] ?? 'unknown'));
                 }
 
                 return new OperationResult(true, $jsonResponse);

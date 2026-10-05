@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace HauerHeinrich\Typo3MonitorApi\Operation;
 
 /**
- * This file is part of the "zabbix_client" Extension for TYPO3 CMS.
+ * This file is part of the "typo3_monitor_api" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
@@ -13,28 +13,23 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  * @author
  */
 
-use \TYPO3\CMS\Core\Database\ConnectionPool;
-use \TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use \TYPO3\CMS\Core\SingletonInterface;
-use \TYPO3\CMS\Core\Utility\GeneralUtility;
-use \HauerHeinrich\Typo3MonitorApi\OperationResult;
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 
-/**
- *
- */
-class GetLogResults implements IOperation, SingletonInterface
-{
+class GetLogResults implements IOperation {
+    public function __construct(
+        private readonly ConnectionPool $connectionPool,
+    ) {}
 
-    /**
-     * @var array
-     */
-    protected $actions = [
+    protected array $actions = [
         255 => 'actionLogin',
         -1 => 'actionErrors'
     ];
 
-    protected $timeFrames = [
+    protected array $timeFrames = [
         0 => 'thisWeek',
         1 => 'lastWeek',
         2 => 'last7Days',
@@ -46,12 +41,10 @@ class GetLogResults implements IOperation, SingletonInterface
     ];
 
     /**
-     *
      * @param array $parameter None
      * @return OperationResult
      */
-    public function execute(array $parameter = []): OperationResult
-    {
+    public function execute(array $parameter, ServerRequestInterface $request): OperationResult {
         if(!isset($parameter['filter'])) {
             return new OperationResult(false, [], 'Error no param filter set!');
         }
@@ -93,7 +86,7 @@ class GetLogResults implements IOperation, SingletonInterface
         }
 
         /** @var QueryBuilder $queryBuilder */
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_log');
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable('sys_log');
         $queryBuilder->resetRestrictions();
 
         if($maxResults > 0) {
@@ -101,7 +94,7 @@ class GetLogResults implements IOperation, SingletonInterface
                 ->select('uid', 'tstamp', 'details', 'IP')
                 ->setMaxResults($maxResults);
         } else {
-            $queryBuilder->select('uid');
+            $queryBuilder->count('uid');
         }
 
         $queryBuilder
@@ -136,10 +129,10 @@ class GetLogResults implements IOperation, SingletonInterface
         if($maxResults > 0) {
             $log = $queryBuilder->executeQuery()->fetchAllAssociative();
         } else {
-            $log = $queryBuilder->executeQuery()->rowCount();
+            // rowCount() is not reliable for SELECT queries, COUNT() is
+            $log = (int)$queryBuilder->executeQuery()->fetchOne();
         }
-
-        if($log < 1) {
+        if(empty($log)) {
             return new OperationResult(true);
         }
 

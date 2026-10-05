@@ -10,9 +10,9 @@ namespace HauerHeinrich\Typo3MonitorApi\Utility;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use \TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
-use \TYPO3\CMS\Core\Utility\GeneralUtility;
-use \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 
 class Configuration {
 
@@ -41,18 +41,5 @@ class Configuration {
             ConfigurationManagerInterface::CONFIGURATION_TYPE_FRAMEWORK,
             self::EXTENSION_KEY
         );
-    }
-
-    /**
-     * setExtConfiguration
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return void
-     */
-    public static function setExtConfiguration(string $key, $value): void {
-        $config = self::getExtConfiguration();
-        $config[$key] = $value;
-        GeneralUtility::makeInstance(ExtensionConfiguration::class)->set(self::EXTENSION_KEY, '', $config);
     }
 }

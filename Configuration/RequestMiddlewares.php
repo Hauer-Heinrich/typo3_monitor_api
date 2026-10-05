@@ -11,8 +11,9 @@ return [
             ],
             'after' => [
                 'typo3/cms-frontend/authentication',
+                // required for the site's 404 page (ErrorController)
                 'typo3/cms-frontend/site',
-            ]
+            ],
         ],
-    ]
+    ],
 ];

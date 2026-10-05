@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace HauerHeinrich\Typo3MonitorApi\ViewHelpers;
 
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 
 class AllowedOperationsViewHelper extends AbstractViewHelper {
@@ -38,8 +37,7 @@ class AllowedOperationsViewHelper extends AbstractViewHelper {
         $extensionConfiguration = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][$extensionKey] ?? [];
         $operations = $extensionConfiguration['operations'] ?? [];
 
-        $routingConfig = GeneralUtility::makeInstance(\HauerHeinrich\Typo3MonitorApi\Utility\RoutingConfig::class);
-        $allowedOperations = $routingConfig->getMethodsAllowed();
+        $allowedOperations = \HauerHeinrich\Typo3MonitorApi\Api\OperationRegistry::getDefinitions();
 
         $return = '
             <style>
@@ -50,18 +48,22 @@ class AllowedOperationsViewHelper extends AbstractViewHelper {
         ';
 
         foreach ($allowedOperations as $key => $value) {
-            if(is_string($key) && is_array($value)) {
-                $clearName = $key;
+            if(is_string($key)) {
+                $clearName = htmlspecialchars($key);
                 $checked = '';
 
-                if(array_key_exists($clearName, $operations) && $operations[$clearName] !== "0") {
+                if(array_key_exists($key, $operations) && (string)$operations[$key] === '1') {
                     $checked = 'checked';
                 }
 
+                // The checkbox value must always be "1": the hidden field sends "0" when unchecked,
+                // a checked checkbox overrides it. (Previously value="0" for unchecked operations,
+                // so they could never be enabled.)
                 $return .= '
                     <div class="option">
-                        <input type="checkbox" id="'.$clearName.'" name="operations.'.$clearName.'" value="1" '.$checked.'>
-                        <label for="'.$clearName.'">'.$clearName.'</label>
+                        <input type="hidden" name="operations.'.$clearName.'" value="0">
+                        <input type="checkbox" id="operation-'.$clearName.'" name="operations.'.$clearName.'" value="1" '.$checked.'>
+                        <label for="operation-'.$clearName.'">'.$clearName.'</label>
                     </div>';
             }
         }

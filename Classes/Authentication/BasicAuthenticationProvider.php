@@ -10,48 +10,51 @@ namespace HauerHeinrich\Typo3MonitorApi\Authentication;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use HauerHeinrich\Typo3MonitorApi\Domain\Model\User;
-use HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\InvalidPasswordHashException;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\PasswordHashFactory;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use HauerHeinrich\Typo3MonitorApi\Authorization\OperationAuthorizationProvider;
+use HauerHeinrich\Typo3MonitorApi\Domain\Model\AuthenticatedUser;
+use HauerHeinrich\Typo3MonitorApi\Domain\Model\User;
+use HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
 
 /**
- * Validates API credentials against be_users.
+ * Validates API credentials against be_users and returns the user with its API settings
+ * (allowed IPs and operations from the tab "Monitor API").
  *
  * - Deleted, disabled and expired users are rejected (default query restrictions).
- * - Admin users are rejected unless "allowAdminUsers" is enabled: the API bypasses
+ * - Admin users are rejected: the API bypasses
  *   MFA and the backend login, so an admin password must never be usable here.
  * - If "allowedUsers" is set, only these usernames are accepted.
+ *
+ * No backend session is started and no backend groups are involved.
  */
-final class BasicAuthenticationProvider
-{
+final class BasicAuthenticationProvider {
     public function __construct(
         private readonly ConnectionPool $connectionPool,
         private readonly PasswordHashFactory $passwordHashFactory,
         private readonly ExtensionConfiguration $extensionConfiguration,
     ) {}
 
-    public function authenticate(User $user): bool
-    {
+    public function authenticate(User $user): ?AuthenticatedUser {
         $username = (string)$user->getUserName();
         $password = (string)$user->getUserPassword();
         if ($username === '' || $password === '') {
-            return false;
+            return null;
         }
 
         $config = $this->extensionConfiguration->get(Configuration::EXTENSION_KEY);
 
         $allowedUsers = GeneralUtility::trimExplode(',', (string)($config['allowedUsers'] ?? ''), true);
         if ($allowedUsers !== [] && !in_array($username, $allowedUsers, true)) {
-            return false;
+            return null;
         }
 
         $queryBuilder = $this->connectionPool->getQueryBuilderForTable('be_users');
         $row = $queryBuilder
-            ->select('username', 'password', 'admin')
+            ->select('uid', 'username', 'password', 'admin', IpAuthenticationProvider::USER_FIELD, OperationAuthorizationProvider::USER_FIELD)
             ->from('be_users')
             ->where(
                 $queryBuilder->expr()->eq('username', $queryBuilder->createNamedParameter($username))
@@ -61,20 +64,29 @@ final class BasicAuthenticationProvider
             ->fetchAssociative();
 
         if ($row === false) {
-            return false;
+            return null;
         }
 
-        if ((int)$row['admin'] === 1 && !(bool)($config['allowAdminUsers'] ?? false)) {
-            return false;
+        if ((int)$row['admin'] === 1) {
+            return null;
         }
 
         $passwordHash = (string)$row['password'];
         try {
             $hashInstance = $this->passwordHashFactory->get($passwordHash, 'BE');
         } catch (InvalidPasswordHashException) {
-            return false;
+            return null;
         }
 
-        return $hashInstance->checkPassword($password, $passwordHash);
+        if (!$hashInstance->checkPassword($password, $passwordHash)) {
+            return null;
+        }
+
+        return new AuthenticatedUser(
+            (int)$row['uid'],
+            (string)$row['username'],
+            (string)($row[IpAuthenticationProvider::USER_FIELD] ?? ''),
+            GeneralUtility::trimExplode(',', (string)($row[OperationAuthorizationProvider::USER_FIELD] ?? ''), true),
+        );
     }
 }

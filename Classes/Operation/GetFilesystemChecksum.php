@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace HauerHeinrich\Typo3MonitorApi\Operation;
 
 /**
- * This file is part of the "zabbix_client" Extension for TYPO3 CMS.
+ * This file is part of the "typo3_monitor_api" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
@@ -13,10 +13,10 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  * @author
  */
 
-use \TYPO3\CMS\Core\SingletonInterface;
-use \TYPO3\CMS\Core\Utility\GeneralUtility;
-use \TYPO3\CMS\Core\Core\Environment;
-use \HauerHeinrich\Typo3MonitorApi\OperationResult;
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Core\Environment;
+use HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 /**
  * Returns a "fingerprint" of a given path, can be used to check if a file or folder has been changed
@@ -27,21 +27,21 @@ use \HauerHeinrich\Typo3MonitorApi\OperationResult;
  * @author Tobias Liebig <liebig@networkteam.com>
  *
  */
-class GetFilesystemChecksum implements IOperation, SingletonInterface {
+class GetFilesystemChecksum implements IOperation {
     /**
      * Get the file / folder checksum of a given path
      *
      * @param array $parameter Path to a file or folder
      * @return OperationResult The checksum of the given folder or file
      */
-    public function execute(array $parameter = []): OperationResult {
+    public function execute(array $parameter, ServerRequestInterface $request): OperationResult {
         $path = $this->getPath($parameter['path']);
-        $getSingleChecksums = $this->getPath($parameter['getSingleChecksums']);
+        $getSingleChecksums = (bool)($parameter['getSingleChecksums'] ?? false);
 
         $checksum = '';
         $md5s = null;
 
-        if ($path !== false) {
+        if ($path !== '') {
             if (is_dir($path)) {
                 list($checksum, $md5s) = $this->getFolderChecksum($path);
             } else {
@@ -72,12 +72,6 @@ class GetFilesystemChecksum implements IOperation, SingletonInterface {
     protected function getPath(string $path): string {
         if (substr($path, -1) === '/') {
             $path = substr($path, 0, -1);
-        }
-
-        // FIXME remove this hacky part
-        // skip path checks for CLI mode
-        if (defined('TYPO3_cliMode')) {
-            return $path;
         }
 
         // getFileAbsFileName can't handle directory path with trailing / correctly

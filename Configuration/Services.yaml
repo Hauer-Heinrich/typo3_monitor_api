@@ -7,3 +7,13 @@ services:
 
   HauerHeinrich\Typo3MonitorApi\:
     resource: '../Classes/*'
+
+  # Middlewares are fetched from the container, so services injected via constructor need a public entry point
+  HauerHeinrich\Typo3MonitorApi\Middleware\MonitorApi:
+    public: true
+
+  # The OperationDispatcher fetches operations by class name from the container
+  # (see Configuration/MonitorOperations.php), so they have to be public
+  HauerHeinrich\Typo3MonitorApi\Operation\:
+    resource: '../Classes/Operation/*'
+    public: true

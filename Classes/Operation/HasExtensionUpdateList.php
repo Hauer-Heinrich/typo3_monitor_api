@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace HauerHeinrich\Typo3MonitorApi\Operation;
 
 /**
- * This file is part of the "zabbix_client" Extension for TYPO3 CMS.
+ * This file is part of the "typo3_monitor_api" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
@@ -13,57 +13,45 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  * @author
  */
 
-use \TYPO3\CMS\Core\SingletonInterface;
-use \TYPO3\CMS\Core\Utility\GeneralUtility;
-use \TYPO3\CMS\Extensionmanager\Domain\Model\Extension;
-use \TYPO3\CMS\Extensionmanager\Utility\ListUtility;
-use \HauerHeinrich\Typo3MonitorApi\OperationResult;
+use Psr\Http\Message\ServerRequestInterface;
+use HauerHeinrich\Typo3MonitorApi\Service\ExtensionInformationService;
+use HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 
 /**
  * Returns an array of extensions which have updates available
  */
-class HasExtensionUpdateList implements IOperation, SingletonInterface
-{
+class HasExtensionUpdateList implements IOperation {
+
+    public function __construct(
+        private readonly ExtensionInformationService $extensionInformationService,
+    ) {}
 
     /**
-     *
      * @param array $parameter None
      * @return OperationResult
      */
-    public function execute(array $parameter = []): OperationResult
-    {
+    public function execute(array $parameter, ServerRequestInterface $request): OperationResult {
         $scope = isset($parameter['scope']) ? $parameter['scope'] : '';
 
-        /** @var ListUtility $listUtility */
-        $listUtility = GeneralUtility::makeInstance(ListUtility::class);
-        $extensionInformation = $listUtility->getAvailableAndInstalledExtensionsWithAdditionalInformation();
+        $extensionInformation = $this->extensionInformationService->getExtensionInformation();
+        if ($extensionInformation === null) {
+            return new OperationResult(false, [], 'EXT:extensionmanager not loaded!');
+        }
+
         $loadedOutdated = [];
         $existingOutdated = [];
-
         foreach ($extensionInformation as $extensionKey => $information) {
-            if (
-                array_key_exists('terObject', $information)
-                && $information['terObject'] instanceof Extension
-            ) {
-                /** @var Extension $terObject */
-                $terObject = $information['terObject'];
-
-                if ($information['updateAvailable'] == true && !$terObject->getCurrentVersion()) {
-                    if (
-                        array_key_exists('installed', $information)
-                        && $information['installed'] === true
-                    ) {
-                        $loadedOutdated[] = [
-                            'extensionKey' => $extensionKey,
-                            'version' => $terObject->getVersion(),
-                        ];
-                    } else {
-                        $existingOutdated[] = [
-                            'extensionKey' => $extensionKey,
-                            'version' => $terObject->getVersion(),
-                        ];
-                    }
+            $ter = $information['ter'];
+            if ($ter !== null && $information['updateAvailable'] === true && !$ter['currentVersion']) {
+                $entry = [
+                    'extensionKey' => $extensionKey,
+                    'version' => $ter['version'],
+                ];
+                if ($information['installed']) {
+                    $loadedOutdated[] = $entry;
+                } else {
+                    $existingOutdated[] = $entry;
                 }
             }
         }

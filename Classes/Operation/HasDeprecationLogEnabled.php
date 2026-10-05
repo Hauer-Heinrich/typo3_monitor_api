@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace HauerHeinrich\Typo3MonitorApi\Operation;
 
 /**
- * This file is part of the "zabbix_client" Extension for TYPO3 CMS.
+ * This file is part of the "typo3_monitor_api" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
@@ -13,8 +13,8 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  * @author
  */
 
-use \TYPO3\CMS\Core\SingletonInterface;
-use \HauerHeinrich\Typo3MonitorApi\OperationResult;
+use Psr\Http\Message\ServerRequestInterface;
+use HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 
 /**
@@ -25,10 +25,9 @@ use \HauerHeinrich\Typo3MonitorApi\OperationResult;
  * E_USER_DEPRECATED
  *
  */
-class HasDeprecationLogEnabled implements IOperation, SingletonInterface
-{
+class HasDeprecationLogEnabled implements IOperation {
 
-    protected static $levelNames = [
+    protected static array $levelNames = [
         E_DEPRECATED => 'E_DEPRECATED',
         E_USER_DEPRECATED => 'E_USER_DEPRECATED',
     ];
@@ -38,8 +37,7 @@ class HasDeprecationLogEnabled implements IOperation, SingletonInterface
      * @param array $parameter None
      * @return OperationResult
      */
-    public function execute(array $parameter = []): OperationResult
-    {
+    public function execute(array $parameter, ServerRequestInterface $request): OperationResult {
         $errorHandlerErrors = $GLOBALS['TYPO3_CONF_VARS']['SYS']['errorHandlerErrors'];
 
         $levels = [];

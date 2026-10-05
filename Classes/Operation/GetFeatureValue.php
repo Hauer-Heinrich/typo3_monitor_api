@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace HauerHeinrich\Typo3MonitorApi\Operation;
 
 /**
- * This file is part of the "zabbix_client" Extension for TYPO3 CMS.
+ * This file is part of the "typo3_monitor_api" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
@@ -13,39 +13,36 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  * @author
  */
 
-use \TYPO3\CMS\Core\SingletonInterface;
-use \TYPO3\CMS\Core\Utility\GeneralUtility;
-use \TYPO3\CMS\Install\Configuration\AbstractPreset;
-use \TYPO3\CMS\Install\Configuration\Cache\CacheFeature;
-use \TYPO3\CMS\Install\Configuration\Context\ContextFeature;
-use \TYPO3\CMS\Install\Configuration\Exception;
-use \TYPO3\CMS\Install\Configuration\Image\ImageFeature;
-use \TYPO3\CMS\Install\Configuration\Mail\MailFeature;
-use \TYPO3\CMS\Install\Configuration\PasswordHashing\PasswordHashingFeature;
-use \HauerHeinrich\Typo3MonitorApi\OperationResult;
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Install\Configuration\AbstractPreset;
+use TYPO3\CMS\Install\Configuration\Cache\CacheFeature;
+use TYPO3\CMS\Install\Configuration\Context\ContextFeature;
+use TYPO3\CMS\Install\Configuration\Exception;
+use TYPO3\CMS\Install\Configuration\Image\ImageFeature;
+use TYPO3\CMS\Install\Configuration\Mail\MailFeature;
+use TYPO3\CMS\Install\Configuration\PasswordHashing\PasswordHashingFeature;
+use HauerHeinrich\Typo3MonitorApi\OperationResult;
 
-
-/**
- *
- *
- */
-class GetFeatureValue implements IOperation, SingletonInterface
-{
+class GetFeatureValue implements IOperation {
 
     /**
-     *
      * @param array $parameter None
      * @return OperationResult
      */
-    public function execute(array $parameter = []): OperationResult
-    {
-
+    public function execute(array $parameter, ServerRequestInterface $request): OperationResult {
         if (!isset($parameter['feature'])) {
             return new OperationResult(false, [], 'Param feature not set! Allowed values are: \'cache, context, image, mail, passwordhashing\'');
         }
 
         if($parameter['feature'] === '') {
             return new OperationResult(false, [], 'Param feature is empty! Allowed values are: \'cache, context, image, mail, passwordhashing\'');
+        }
+
+        // EXT:install is optional, so the feature classes are fetched lazily
+        if (!ExtensionManagementUtility::isLoaded('install')) {
+            return new OperationResult(false, [], 'EXT:install not loaded!');
         }
 
         switch (strtolower($parameter['feature'])) {
@@ -69,6 +66,8 @@ class GetFeatureValue implements IOperation, SingletonInterface
                 /** @var PasswordHashingFeature $feature */
                 $feature = GeneralUtility::makeInstance(PasswordHashingFeature::class);
                 break;
+            default:
+                return new OperationResult(false, [], 'Param feature not valid! Allowed values are: \'cache, context, image, mail, passwordhashing\'');
         }
 
         try {
@@ -81,7 +80,7 @@ class GetFeatureValue implements IOperation, SingletonInterface
                 }
             }
         } catch (Exception $e) {
-            return new OperationResult(false, [], $e);
+            return new OperationResult(false, [], $e->getMessage());
         }
 
         return new OperationResult(false);

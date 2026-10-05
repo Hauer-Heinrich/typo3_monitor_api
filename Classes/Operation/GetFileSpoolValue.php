@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace HauerHeinrich\Typo3MonitorApi\Operation;
 
 /**
- * This file is part of the "zabbix_client" Extension for TYPO3 CMS.
+ * This file is part of the "typo3_monitor_api" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
@@ -13,9 +13,9 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  * @author
  */
 
-use \TYPO3\CMS\Core\SingletonInterface;
-use \TYPO3\CMS\Core\Utility\GeneralUtility;
-use \HauerHeinrich\Typo3MonitorApi\OperationResult;
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 
 /**
@@ -25,15 +25,13 @@ use \HauerHeinrich\Typo3MonitorApi\OperationResult;
  * - sending: Returns mails trying to send.
  * - lag: Returns time passed in seconds from oldest file in spool.
  */
-class GetFileSpoolValue implements IOperation, SingletonInterface
-{
+class GetFileSpoolValue implements IOperation {
     /**
      *
      * @param array $parameter None
      * @return OperationResult
      */
-    public function execute(array $parameter = []): OperationResult
-    {
+    public function execute(array $parameter, ServerRequestInterface $request): OperationResult {
         $value = $parameter['value'] ?? null;
         $filePath = $GLOBALS['TYPO3_CONF_VARS']['MAIL']['transport_spool_filepath'] ?? $GLOBALS['TYPO3_CONF_VARS']['MAIL']['spool_file_path'] ?? null;
 
@@ -77,6 +75,6 @@ class GetFileSpoolValue implements IOperation, SingletonInterface
                 break;
         }
 
-        throw new \InvalidArgumentException('Parameter value not set or invalid');
+        return new OperationResult(false, [], 'Param \'value\' not valid! Allowed values are: \'pending, sending, lag\'');
     }
 }

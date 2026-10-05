@@ -15,11 +15,8 @@ namespace HauerHeinrich\Typo3MonitorApi\Utility;
 trait CheckBodyContent {
 
     public $returnValue = [];
-
     public $errors = [];
-
     public $allowedParameter = [];
-
     protected $bodyContentArray = [];
 
     /**

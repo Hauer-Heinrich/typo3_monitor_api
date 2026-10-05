@@ -1,20 +1,23 @@
-# cat=api-access/enable; type=user[HauerHeinrich\Typo3MonitorApi\ViewHelpers\AllowedOperationsViewHelper->select]; label=Allowed operations:Only enabled operations can be called. Keep write operations like UpdateMinorTypo3 disabled unless you really need them.
+# cat=api-access/enable; type=user[HauerHeinrich\Typo3MonitorApi\ViewHelpers\AllowedOperationsViewHelper->select]; label=Allowed operations:Global upper limit. An operation is only callable if it is enabled here AND ticked in the backend user record (tab Monitor API). Keep write operations like UpdateMinorTypo3 disabled unless you really need them.
 operations.allowedOperations =
 
-# cat=api-access/enable; type=string; label=Allowed IPs:Required. Comma separated list of IPs, wildcards (203.0.113.*), CIDR ranges (203.0.113.0/24, 2001:db8::/32) or prefixes (203.0.113.). Empty = nobody, * = every IP.
+# cat=api-access/enable; type=string; label=Allowed IPs:Global whitelist, checked before login. Comma separated list of IPs, wildcards (203.0.113.*), CIDR ranges (203.0.113.0/24, 2001:db8::/32) or prefixes (203.0.113.). Empty = nobody, * = every IP (then restrict per user in the backend user record, tab Monitor API).
 allowedIps =
 
 # cat=api-access/enable; type=string; label=Allowed users:Comma separated list of backend usernames that may use the API. Empty = every non-admin backend user.
 allowedUsers =
-
-# cat=api-access/enable; type=boolean; label=Allow admin users:Not recommended. The API bypasses MFA and the backend login, use a dedicated user without any rights instead.
-allowAdminUsers = 0
 
 # cat=api-access/enable; type=integer; label=Block time:Duration in minutes an IP is blocked after too many failed logins (sliding window). 0 = disable brute-force protection.
 blockTime = 5
 
 # cat=api-access/enable; type=integer; label=Max failed logins:Number of failed logins within the block time before the IP is blocked. 0 = disable brute-force protection.
 maxCount = 3
+
+# cat=api-access/enable; type=integer; label=Cache lifetime (minutes):How long results of expensive or external lookups are cached (TYPO3 releases from get.typo3.org for HasUpdate/HasSecurityUpdate, extension update information). 0 = no caching.
+cacheLifetime = 60
+
+# cat=api-access/enable; type=boolean; label=Require HTTPS:Reject requests without TLS, credentials are sent with every request. Only disable for local development.
+requireHttps = 1
 
 # cat=api-access/enable; type=boolean; label=Debug output:Return JSON error messages instead of the site's 404 page. Do not enable in production.
 debugOutput = 0

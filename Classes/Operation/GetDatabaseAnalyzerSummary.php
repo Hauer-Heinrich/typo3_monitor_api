@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace HauerHeinrich\Typo3MonitorApi\Operation;
 
 /**
- * This file is part of the "zabbix_client" Extension for TYPO3 CMS.
+ * This file is part of the "typo3_monitor_api" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
@@ -13,29 +13,30 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  * @author
  */
 
-use \TYPO3\CMS\Core\SingletonInterface;
-use \TYPO3\CMS\Core\Utility\GeneralUtility;
-use \TYPO3\CMS\Core\Database\Schema\SqlReader;
-use \HauerHeinrich\Typo3MonitorApi\OperationResult;
-use \TYPO3\CMS\Core\Database\Schema\SchemaMigrator;
-use \TYPO3\CMS\Core\Database\Schema\Exception\StatementException;
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Database\Schema\SqlReader;
+use TYPO3\CMS\Core\Database\Schema\SchemaMigrator;
+use TYPO3\CMS\Core\Database\Schema\Exception\StatementException;
+use HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 /**
  * Information about database schema updates.
  */
-class GetDatabaseAnalyzerSummary implements IOperation, SingletonInterface
-{
+class GetDatabaseAnalyzerSummary implements IOperation {
+    public function __construct(
+        private readonly SqlReader $sqlReader,
+        private readonly SchemaMigrator $schemaMigrator,
+    ) {}
+
     /**
      * @param array $parameter None
      * @return OperationResult the current application context
      */
-    public function execute(array $parameter = []): OperationResult
-    {
+    public function execute(array $parameter, ServerRequestInterface $request): OperationResult {
         try {
             $values = [];
-            $sqlReader = GeneralUtility::makeInstance(SqlReader::class);
-            $sqlStatements = $sqlReader->getCreateTableStatementArray($sqlReader->getTablesDefinitionString());
-            $schemaMigrationService = GeneralUtility::makeInstance(SchemaMigrator::class);
+            $sqlStatements = $this->sqlReader->getCreateTableStatementArray($this->sqlReader->getTablesDefinitionString());
+            $schemaMigrationService = $this->schemaMigrator;
             $addCreateChange = $schemaMigrationService->getUpdateSuggestions($sqlStatements);
             $addCreateChange = array_merge_recursive(...array_values($addCreateChange));
             if (!empty($addCreateChange['add'])) {

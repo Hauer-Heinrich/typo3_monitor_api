@@ -10,13 +10,13 @@ namespace HauerHeinrich\Typo3MonitorApi\Authentication;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\RateLimiter\LimiterInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\RateLimiter\Storage\CachingFrameworkStorage;
+use HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
 
 /**
  * Blocks an IP after "maxCount" failed logins within "blockTime" minutes (sliding window).
@@ -25,8 +25,7 @@ use TYPO3\CMS\Core\RateLimiter\Storage\CachingFrameworkStorage;
  *
  * Setting maxCount or blockTime to 0 disables the limiter.
  */
-final class LoginRateLimiter
-{
+final class LoginRateLimiter {
     private ?RateLimiterFactory $factory = null;
 
     public function __construct(
@@ -35,21 +34,18 @@ final class LoginRateLimiter
         private readonly CachingFrameworkStorage $storage,
     ) {}
 
-    public function isBlocked(ServerRequestInterface $request): bool
-    {
+    public function isBlocked(ServerRequestInterface $request): bool {
         $limiter = $this->getLimiter($request);
 
         // consume(0) only reads the current state without using up a token
         return $limiter !== null && $limiter->consume(0)->getRemainingTokens() === 0;
     }
 
-    public function registerFailedAttempt(ServerRequestInterface $request): void
-    {
+    public function registerFailedAttempt(ServerRequestInterface $request): void {
         $this->getLimiter($request)?->consume();
     }
 
-    private function getLimiter(ServerRequestInterface $request): ?LimiterInterface
-    {
+    private function getLimiter(ServerRequestInterface $request): ?LimiterInterface {
         $config = $this->extensionConfiguration->get(Configuration::EXTENSION_KEY);
         $maxCount = (int)($config['maxCount'] ?? 3);
         $blockTime = (int)($config['blockTime'] ?? 5);

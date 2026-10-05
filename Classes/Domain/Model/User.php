@@ -15,69 +15,26 @@ namespace HauerHeinrich\Typo3MonitorApi\Domain\Model;
 /**
  * User
  */
-class User extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
-{
+class User extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity {
 
     /**
-     * userName
-     *
-     * @var string
      * @TYPO3\CMS\Extbase\Annotation\Validate("NotEmpty")
      */
-    protected $userName = '';
+    protected string $userName = '';
 
     /**
-     * userPassword
-     *
-     * @var string
      * @TYPO3\CMS\Extbase\Annotation\Validate("NotEmpty")
      */
-    protected $userPassword;
+    protected string $userPassword;
 
-    public function __construct($userName, $userPassword) {
+    public function __construct(string $userName, string $userPassword) {
         $this->setUserName($userName);
         $this->setUserPassword($userPassword);
     }
 
-    /**
-     * Returns the userName
-     *
-     * @return string $userName
-     */
-    public function getUserName()
-    {
-        return $this->userName;
-    }
+    public function getUserName(): string { return $this->userName; }
+    public function setUserName(string $userName): void { $this->userName = $userName; }
 
-    /**
-     * Sets the userName
-     *
-     * @param string $userName
-     * @return void
-     */
-    public function setUserName(string $userName)
-    {
-        $this->userName = $userName;
-    }
-
-    /**
-     * Returns the userPassword
-     *
-     * @return string $userPassword
-     */
-    public function getUserPassword()
-    {
-        return $this->userPassword;
-    }
-
-    /**
-     * Sets the userPassword
-     *
-     * @param string $userPassword
-     * @return void
-     */
-    public function setUserPassword(string $userPassword)
-    {
-        $this->userPassword = $userPassword;
-    }
+    public function getUserPassword(): string { return $this->userPassword; }
+    public function setUserPassword(string $userPassword): void { $this->userPassword = $userPassword; }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace HauerHeinrich\Typo3MonitorApi\Operation;
 
 /**
- * This file is part of the "zabbix_client" Extension for TYPO3 CMS.
+ * This file is part of the "typo3_monitor_api" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
@@ -13,23 +13,22 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  * @author
  */
 
-use \TYPO3\CMS\Core\SingletonInterface;
-use \TYPO3\CMS\Core\Utility\CommandUtility;
-use \HauerHeinrich\Typo3MonitorApi\OperationResult;
-use \HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Utility\CommandUtility;
+use HauerHeinrich\Typo3MonitorApi\OperationResult;
+use HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
 
 
 /**
  * A Operation which returns the programm versions
  */
-class GetProgramVersion implements IOperation, SingletonInterface
-{
+class GetProgramVersion implements IOperation {
+
     /**
      * @param array $parameter None
      * @return OperationResult the current PHP version
      */
-    public function execute(array $parameter = []): OperationResult
-    {
+    public function execute(array $parameter, ServerRequestInterface $request): OperationResult {
         if (!isset($parameter['program'])) {
             // throw new InvalidArgumentException('no program set');
             return new OperationResult(false, [], 'Param \'program\' not set! Allowed values are: \'openssl, gm, im, optipng, jpegoptim, webp\'.');
@@ -42,7 +41,7 @@ class GetProgramVersion implements IOperation, SingletonInterface
         $programName = $parameter['program'];
 
         $config = Configuration::getExtConfiguration();
-        $paths = $config['program.'] ?? $config['program'];
+        $paths = $config['program.'] ?? $config['program'] ?? [];
 
         switch ($programName) {
             case 'openssl':
@@ -52,7 +51,7 @@ class GetProgramVersion implements IOperation, SingletonInterface
                     $executingResult = [];
                     CommandUtility::exec($command, $executingResult);
                     $firstResultLine = array_shift($executingResult);
-                    return new OperationResult(true, explode(' ', $firstResultLine)[1]);
+                    return new OperationResult(true, [[ 'version' => explode(' ', (string)$firstResultLine)[1] ?? '' ]]);
                 }
                 break;
             case 'gm':
@@ -63,7 +62,7 @@ class GetProgramVersion implements IOperation, SingletonInterface
                     CommandUtility::exec($command, $executingResult);
                     $firstResultLine = array_shift($executingResult);
                     if (strpos($firstResultLine, 'GraphicsMagick') !== false) {
-                        return new OperationResult(true, explode(' ', $firstResultLine)[1]);
+                        return new OperationResult(true, [[ 'version' => explode(' ', (string)$firstResultLine)[1] ?? '' ]]);
                     }
                 }
                 break;
@@ -75,7 +74,7 @@ class GetProgramVersion implements IOperation, SingletonInterface
                     CommandUtility::exec($command, $executingResult);
                     $firstResultLine = array_shift($executingResult);
                     if (strpos($firstResultLine, 'ImageMagick') !== false) {
-                        return new OperationResult(true, explode(' ', $firstResultLine)[2]);
+                        return new OperationResult(true, [[ 'version' => explode(' ', (string)$firstResultLine)[2] ?? '' ]]);
                     }
                 }
                 break;
@@ -86,7 +85,7 @@ class GetProgramVersion implements IOperation, SingletonInterface
                     $executingResult = [];
                     CommandUtility::exec($command, $executingResult);
                     $firstResultLine = array_shift($executingResult);
-                    return new OperationResult(true, explode(' ', $firstResultLine)[2]);
+                    return new OperationResult(true, [[ 'version' => explode(' ', (string)$firstResultLine)[2] ?? '' ]]);
                 }
                 break;
             case 'jpegoptim':
@@ -96,7 +95,7 @@ class GetProgramVersion implements IOperation, SingletonInterface
                     $executingResult = [];
                     CommandUtility::exec($command, $executingResult);
                     $firstResultLine = array_shift($executingResult);
-                    return new OperationResult(true, explode(' ', $firstResultLine)[1]);
+                    return new OperationResult(true, [[ 'version' => explode(' ', (string)$firstResultLine)[1] ?? '' ]]);
                 }
                 break;
             case 'webp':
@@ -106,7 +105,7 @@ class GetProgramVersion implements IOperation, SingletonInterface
                     $executingResult = [];
                     CommandUtility::exec($command, $executingResult);
                     $firstResultLine = array_shift($executingResult);
-                    return new OperationResult(true, trim($firstResultLine));
+                    return new OperationResult(true, [[ 'version' => trim((string)$firstResultLine) ]]);
                 }
                 break;
             default:

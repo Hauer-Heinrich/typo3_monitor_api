@@ -16,6 +16,27 @@ namespace HauerHeinrich\Typo3MonitorApi\Utility;
 class FormatUtility {
 
     /**
+     * Date formats allowed for the parameter "format" (GetLastSchedulerRun, GetLastExtensionListUpdate)
+     */
+    public const DATE_FORMATS = ['d M Y H:i:s', 'd M Y', 'H:i:s', 'c', 'r'];
+
+    /**
+     * formatDateTime
+     * Was called by two operations but did not exist, so the parameter "format" caused a fatal error.
+     *
+     * @param int $timestamp
+     * @param string $format one of self::DATE_FORMATS
+     * @return string empty if the format is not allowed
+     */
+    public static function formatDateTime(int $timestamp, string $format): string {
+        if (!in_array($format, self::DATE_FORMATS, true)) {
+            return '';
+        }
+
+        return date($format, $timestamp);
+    }
+
+    /**
      * getHumanReadableSize
      *
      * @param float $bytes

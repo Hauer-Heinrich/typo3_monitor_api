@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace HauerHeinrich\Typo3MonitorApi\Operation;
 
 /**
- * This file is part of the "zabbix_client" Extension for TYPO3 CMS.
+ * This file is part of the "typo3_monitor_api" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
@@ -13,79 +13,43 @@ namespace HauerHeinrich\Typo3MonitorApi\Operation;
  * @author
  */
 
-use \Psr\Http\Message\RequestFactoryInterface;
-use \TYPO3\CMS\Core\SingletonInterface;
-use \TYPO3\CMS\Core\Utility\GeneralUtility;
-use \HauerHeinrich\Typo3MonitorApi\OperationResult;
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Information\Typo3Version;
+use HauerHeinrich\Typo3MonitorApi\Service\Typo3ReleaseInformation;
+use HauerHeinrich\Typo3MonitorApi\OperationResult;
 
 
 /**
+ * Compares the installed TYPO3 version with the latest security release of the same major version
+ * (get.typo3.org, cached, see extension setting "cacheLifetime").
  *
- */
-class HasSecurityUpdate implements IOperation, SingletonInterface
-{
+ * value.bool: true = security update available
+ **/
+class HasSecurityUpdate implements IOperation {
 
-    /**
-     * @var RequestFactoryInterface
-     */
-    private RequestFactoryInterface $requestFactory;
-
-    /**
-     * @param RequestFactoryInterface $requestFactory
-     */
-    public function injectRequestFactoryInterface(RequestFactoryInterface $requestFactory)
-    {
-        $this->requestFactory = $requestFactory;
-    }
+    public function __construct(
+        private readonly Typo3ReleaseInformation $releaseInformation,
+        private readonly Typo3Version $typo3Version,
+    ) {}
 
     /**
      *
      * @param array $parameter None
      * @return OperationResult
      */
-    public function execute(array $parameter = []): OperationResult
-    {
-        $typo3Version = GeneralUtility::makeInstance(\HauerHeinrich\Typo3MonitorApi\Operation\GetTYPO3Version::class)->execute();
-        $currentTypo3Version = $typo3Version->getValue();
-        if(\is_array($currentTypo3Version)) {
-            $currentTypo3Version = $currentTypo3Version[0]['version'];
-        }
-
-        $currentMajorVersionArray = \explode('.', $currentTypo3Version);
-        if(\is_array($currentMajorVersionArray)) {
-            $currentMajorVersion = $currentMajorVersionArray[0];
-        }
-
-        $url = 'https://get.typo3.org/v1/api/major/'.$currentMajorVersion.'/release/latest/security';
-        $additionalOptions = [
-            // Additional headers for this specific request
-            'headers' => ['Cache-Control' => 'no-cache'],
-            // Additional options, see http://docs.guzzlephp.org/en/latest/request-options.html
-            'allow_redirects' => false,
-            'cookies' => false,
-        ];
+    public function execute(array $parameter, ServerRequestInterface $request): OperationResult {
+        $currentTypo3Version = $this->typo3Version->getVersion();
 
         try {
-            // Return a PSR-7 compliant response object
-            $response = $this->requestFactory->request($url, 'GET', $additionalOptions);
-            if ($response->getStatusCode() === 200) {
-                if (strpos($response->getHeaderLine('Content-Type'), 'application/json') === 0) {
-                    $content = json_decode($response->getBody()->getContents(), true);
-
-                    if(version_compare($currentTypo3Version, $content['version'], '<')) {
-                        return new OperationResult(true, [[ 'bool' => true, 'version' => $content['version'] ]], 'Security update available ('.$content['version'].')');
-                    }
-
-                    return new OperationResult(true, [[ 'bool' => false ]], 'No security update available.');
-                }
-            }
+            $latestVersion = $this->releaseInformation->getLatestVersion($this->typo3Version->getMajorVersion(), true);
         } catch (\Throwable $th) {
-            // TODO: log this
-            // TODO: return proper error message
-            //throw $th;
-            return new OperationResult(false, [[ 'exception' => $th ]], 'Error retrieving the patch releases!');
+            return new OperationResult(false, [[ 'exception' => $th->getMessage() ]], 'Error retrieving the patch releases!');
         }
 
-        return new OperationResult(false, [], 'Error retrieving the patch releases!');
+        if (version_compare($currentTypo3Version, $latestVersion, '<')) {
+            return new OperationResult(true, [[ 'bool' => true, 'version' => $latestVersion ]], 'Security update available (' . $latestVersion . ')');
+        }
+
+        return new OperationResult(true, [[ 'bool' => false ]], 'No security update available.');
     }
 }

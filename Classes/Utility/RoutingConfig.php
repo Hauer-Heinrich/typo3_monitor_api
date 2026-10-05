@@ -10,14 +10,15 @@ namespace HauerHeinrich\Typo3MonitorApi\Utility;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-// use \TYPO3\CMS\Extbase\Utility\DebuggerUtility;
-use \TYPO3\CMS\Core\Utility\GeneralUtility;
-use \TYPO3\CMS\Core\Http\JsonResponse;
-use \HauerHeinrich\Typo3MonitorApi\Domain\Model\User;
-use \HauerHeinrich\Typo3MonitorApi\Utility\Route;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Http\JsonResponse;
+use TYPO3\CMS\Core\Http\ServerRequest;
+use HauerHeinrich\Typo3MonitorApi\Domain\Model\User;
+use HauerHeinrich\Typo3MonitorApi\Utility\Route;
+use HauerHeinrich\Typo3MonitorApi\Authorization\OperationAuthorizationProvider;
 
 class RoutingConfig {
-    use \HauerHeinrich\Typo3MonitorApi\Utility\CheckBodyContent;
+    use HauerHeinrich\Typo3MonitorApi\Utility\CheckBodyContent;
 
     protected $allowedHttpMethods = [];
 
@@ -41,11 +42,6 @@ class RoutingConfig {
     public function setMethodsAllowed(): void {
         $this->methodsAllowed = [
             'GetAllowedOperations' => [],
-            'CheckPathExists' => [
-                'parameters' => [
-                    'path' => 'string' // (required)
-                ]
-            ],
             'GetDiskSpace' => [
                 'parameters' => [
                     'format' => 'boolean' // (optional)
@@ -128,7 +124,7 @@ class RoutingConfig {
         return $this->methodsAllowed;
     }
 
-    public function setRoutingConfigs(\TYPO3\CMS\Core\Http\ServerRequest $request, User $user): JsonResponse {
+    public function setRoutingConfigs(ServerRequest $request, User $user): JsonResponse {
         /** @var JsonResponse $response */
         $response = GeneralUtility::makeInstance(JsonResponse::class);
 
@@ -149,8 +145,8 @@ class RoutingConfig {
                 }
             }
 
-            Route::add('/typo3-monitor-api/v1/' . $methodName, function() use ($methodName, &$response, $user, $request) {
-                $response = $this->UserAuth($response, $request, 'HauerHeinrich\\Typo3MonitorApi\\Operation\\' . $methodName, $user, $methodName);
+            Route::add('/typo3-monitor-api/v1/' . $methodName, function() use ($methodName, &$response, $request) {
+                $response = $this->UserAuth($response, $request, 'HauerHeinrich\\Typo3MonitorApi\\Operation\\' . $methodName, $methodName);
             }, $httpMethod);
         }
 
@@ -168,17 +164,19 @@ class RoutingConfig {
      * UserAuth
      *
      * @param JsonResponse $response
-     * @param \TYPO3\CMS\Core\Http\ServerRequest $request
+     * @param ServerRequest $request
      * @param string $classNameSpace
-     * @param \HauerHeinrich\Typo3MonitorApi\Domain\Model\User $user
-     * @return \TYPO3\CMS\Core\Http\JsonResponse
+     * @return JsonResponse
      */
-    protected function UserAuth($response, \TYPO3\CMS\Core\Http\ServerRequest $request,
-        string $classNameSpace, User $user, string $methodName
-    ): \TYPO3\CMS\Core\Http\JsonResponse
-    {
-        // TODO: code isUserAuthorized
-        if(\HauerHeinrich\Typo3MonitorApi\Authorization\UserAuthorizationProvider::isUserAuthorized($response, $classNameSpace, $user)) {
+    protected function UserAuth(
+        $response,
+        ServerRequest $request,
+        string $classNameSpace,
+        string $methodName
+    ): JsonResponse {
+        $operationAuthorization = GeneralUtility::makeInstance(OperationAuthorizationProvider::class);
+        $authenticatedUser = OperationAuthorizationProvider::getUserFromRequest($request);
+        if($operationAuthorization->isOperationAllowed($methodName, $authenticatedUser)) {
             $params = [];
             $params['request'] = $request;
 
@@ -207,7 +205,8 @@ class RoutingConfig {
             }
         }
 
-        $response = $response->withStatus(401, 'Not allowed');
+        // Operation not enabled globally or not allowed for this user
+        $response = $response->withStatus(403, 'Operation not enabled');
 
         return $response;
     }
