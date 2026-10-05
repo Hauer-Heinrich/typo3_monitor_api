@@ -10,12 +10,24 @@ namespace HauerHeinrich\Typo3MonitorApi\Authorization;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-// use \TYPO3\CMS\Extbase\Utility\DebuggerUtility;
-use \TYPO3\CMS\Core\Utility\GeneralUtility;
-use \HauerHeinrich\Typo3MonitorApi\Domain\Model\User;
-use \HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
+use HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 
-class OperationAuthorizationProvider
+/**
+ * Enforces the "Allowed operations" checkboxes of the extension configuration.
+ * Fails closed: an operation is only callable if it was explicitly enabled.
+ */
+final class OperationAuthorizationProvider
 {
+    public function __construct(
+        private readonly ExtensionConfiguration $extensionConfiguration,
+    ) {}
 
+    public function isOperationAllowed(string $operationName): bool
+    {
+        $config = $this->extensionConfiguration->get(Configuration::EXTENSION_KEY);
+        $operations = $config['operations'] ?? [];
+
+        return is_array($operations) && (string)($operations[$operationName] ?? '0') === '1';
+    }
 }

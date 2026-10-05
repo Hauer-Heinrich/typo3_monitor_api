@@ -12,6 +12,7 @@ namespace HauerHeinrich\Typo3MonitorApi\Middleware;
 
 use HauerHeinrich\Typo3MonitorApi\Authentication\BasicAuthenticationProvider;
 use HauerHeinrich\Typo3MonitorApi\Authentication\IpAuthenticationProvider;
+use HauerHeinrich\Typo3MonitorApi\Authentication\LoginRateLimiter;
 use HauerHeinrich\Typo3MonitorApi\Domain\Model\User;
 use HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
 use HauerHeinrich\Typo3MonitorApi\Utility\RoutingConfig;
@@ -19,22 +20,29 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Http\JsonResponse;
+use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Controller\ErrorController;
 
 /**
  * Handles all requests below /typo3-monitor-api:
- * checks the IP whitelist and Basic-Auth credentials, then dispatches to the API routing.
+ * IP whitelist -> brute-force protection -> Basic-Auth -> API routing.
  * All other requests are passed on unchanged.
  */
-class MonitorApi implements MiddlewareInterface, LoggerAwareInterface
+final class MonitorApi implements MiddlewareInterface
 {
-    use LoggerAwareTrait;
-
     private const PATH_PREFIX = '/typo3-monitor-api';
+
+    public function __construct(
+        private readonly IpAuthenticationProvider $ipAuthenticationProvider,
+        private readonly BasicAuthenticationProvider $basicAuthenticationProvider,
+        private readonly LoginRateLimiter $loginRateLimiter,
+        private readonly ExtensionConfiguration $extensionConfiguration,
+        private readonly LoggerInterface $logger,
+    ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -42,24 +50,28 @@ class MonitorApi implements MiddlewareInterface, LoggerAwareInterface
             return $handler->handle($request);
         }
 
-        $config = Configuration::getExtConfiguration();
+        $config = $this->extensionConfiguration->get(Configuration::EXTENSION_KEY);
         $debug = (bool)($config['debugOutput'] ?? false);
 
-        if (!IpAuthenticationProvider::checkIpAddress($request)) {
+        if (!$this->ipAuthenticationProvider->isAllowed($request)) {
             return $this->deny($request, $debug, 403, 'IP not allowed');
         }
 
-        [$username, $password] = $this->getCredentials($request);
-        if ($username === '' || $password === '') {
-            return $this->deny($request, $debug, 401, 'Name or password wrong or not set');
+        if ($this->loginRateLimiter->isBlocked($request)) {
+            $this->logger->warning('Monitor API: request blocked after too many failed logins', [
+                'ip' => $this->getRemoteAddress($request),
+            ]);
+            return $this->deny($request, $debug, 429, 'Too many failed login attempts');
         }
 
+        [$username, $password] = $this->getCredentials($request);
         $user = new User($username, $password);
-        $basicAuth = new BasicAuthenticationProvider($request, $user);
-        if (!$basicAuth->isValid()) {
-            $this->logger?->warning('Monitor API: authentication failed', [
+
+        if (!$this->basicAuthenticationProvider->authenticate($user)) {
+            $this->loginRateLimiter->registerFailedAttempt($request);
+            $this->logger->warning('Monitor API: authentication failed', [
                 'username' => $username,
-                'ip' => $request->getServerParams()['REMOTE_ADDR'] ?? '',
+                'ip' => $this->getRemoteAddress($request),
             ]);
             return $this->deny($request, $debug, 401, 'Name or password wrong or not set');
         }
@@ -110,6 +122,13 @@ class MonitorApi implements MiddlewareInterface, LoggerAwareInterface
         [$username, $password] = explode(':', $decoded, 2);
 
         return [$username, $password];
+    }
+
+    private function getRemoteAddress(ServerRequestInterface $request): string
+    {
+        $normalizedParams = $request->getAttribute('normalizedParams');
+
+        return $normalizedParams instanceof NormalizedParams ? $normalizedParams->getRemoteAddress() : '';
     }
 
     /**

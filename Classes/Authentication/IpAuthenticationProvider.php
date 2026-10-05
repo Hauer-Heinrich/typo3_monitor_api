@@ -10,41 +10,66 @@ namespace HauerHeinrich\Typo3MonitorApi\Authentication;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-// use \TYPO3\CMS\Extbase\Utility\DebuggerUtility;
-use \HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
+use HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Http\NormalizedParams;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class IpAuthenticationProvider {
-    /**
-     * checkIpAddress
-     * check if given ip-address or ip-range is allowed
-     */
-    static public function checkIpAddress(\TYPO3\CMS\Core\Http\ServerRequest $request): bool {
-        $config = Configuration::getExtConfiguration();
+/**
+ * Checks the client IP against the "allowedIps" extension setting.
+ *
+ * Fails closed: an empty setting allows nobody, "*" allows every IP explicitly.
+ * Supported notations (see GeneralUtility::cmpIP()):
+ *   - single IPv4/IPv6 addresses:  203.0.113.10, 2001:db8::1
+ *   - IPv4 wildcards:              203.0.113.*
+ *   - CIDR ranges:                 203.0.113.0/24, 2001:db8::/32
+ *   - legacy prefix notation:      203.0.113.   (converted to 203.0.113.*)
+ */
+final class IpAuthenticationProvider
+{
+    public function __construct(
+        private readonly ExtensionConfiguration $extensionConfiguration,
+    ) {}
 
-        if(is_array($config) && array_key_exists('allowedIps', $config) && is_string($config['allowedIps']) && $config['allowedIps'] !== '*') {
-            if(trim($config['allowedIps']) === '') {
-                return true;
-            }
-
-            $allowedIps = explode(',', $config['allowedIps']);
-            $remoteAddress = $request->getAttribute('normalizedParams')->getRemoteAddress();
-
-            if(empty($remoteAddress)) {
-                return false;
-            }
-
-            foreach ($allowedIps as $ip) {
-                if($ip === $remoteAddress) {
-                    return true;
-                }
-
-                // Check if its in a valid IP Range
-                if(strpos($remoteAddress, $ip) === 0 && preg_match("(:|.)", $ip) === 1 && substr($ip, -1) === ".") {
-                    return true;
-                }
-            }
+    public function isAllowed(ServerRequestInterface $request): bool
+    {
+        $config = $this->extensionConfiguration->get(Configuration::EXTENSION_KEY);
+        $allowedIps = trim((string)($config['allowedIps'] ?? ''));
+        if ($allowedIps === '') {
+            return false;
         }
 
-        return false;
+        $remoteAddress = $this->getRemoteAddress($request);
+        if ($remoteAddress === '') {
+            return false;
+        }
+
+        return GeneralUtility::cmpIP($remoteAddress, $this->normalizeIpList($allowedIps));
+    }
+
+    /**
+     * Uses normalizedParams, so TYPO3's reverseProxyIP / reverseProxyHeaderMultiValue settings are respected.
+     */
+    private function getRemoteAddress(ServerRequestInterface $request): string
+    {
+        $normalizedParams = $request->getAttribute('normalizedParams');
+
+        return $normalizedParams instanceof NormalizedParams ? $normalizedParams->getRemoteAddress() : '';
+    }
+
+    private function normalizeIpList(string $allowedIps): string
+    {
+        $entries = [];
+        foreach (GeneralUtility::trimExplode(',', $allowedIps, true) as $entry) {
+            // Legacy notation "77.6.178." -> "77.6.178.*" (cmpIP expects four IPv4 parts)
+            if (!str_contains($entry, ':') && str_ends_with($entry, '.')) {
+                $parts = explode('.', rtrim($entry, '.'));
+                $entry = implode('.', array_pad($parts, 4, '*'));
+            }
+            $entries[] = $entry;
+        }
+
+        return implode(',', $entries);
     }
 }
