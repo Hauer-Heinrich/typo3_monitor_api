@@ -10,121 +10,71 @@ namespace HauerHeinrich\Typo3MonitorApi\Authentication;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-// use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use HauerHeinrich\Typo3MonitorApi\Domain\Model\User;
+use HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Crypto\PasswordHashing\InvalidPasswordHashException;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\PasswordHashFactory;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use HauerHeinrich\Typo3MonitorApi\Utility\Configuration;
-use HauerHeinrich\Typo3MonitorApi\Domain\Model\User;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class BasicAuthenticationProvider {
-    private $data = [];
+/**
+ * Validates API credentials against be_users.
+ *
+ * - Deleted, disabled and expired users are rejected (default query restrictions).
+ * - Admin users are rejected unless "allowAdminUsers" is enabled: the API bypasses
+ *   MFA and the backend login, so an admin password must never be usable here.
+ * - If "allowedUsers" is set, only these usernames are accepted.
+ */
+final class BasicAuthenticationProvider
+{
+    public function __construct(
+        private readonly ConnectionPool $connectionPool,
+        private readonly PasswordHashFactory $passwordHashFactory,
+        private readonly ExtensionConfiguration $extensionConfiguration,
+    ) {}
 
-    /**
-     * ServerRequest
-     *
-     * @var \TYPO3\CMS\Core\Http\ServerRequest
-     */
-    protected $request;
-
-    /**
-     * Extension configuration
-     *
-     * @var array
-     */
-    protected $config = [];
-
-    /**
-     * isValid
-     *
-     * @var boolean
-     */
-    private $isValid = false;
-
-    public function __construct(\TYPO3\CMS\Core\Http\ServerRequest $request, User $user) {
-        $this->request = $request;
-        // $this->config = Configuration::getExtConfiguration();
-
-        $this->validateRequestUserName($user->getUserName());
-        $this->validateRequestUserPassword($user->getUserPassword());
-        $this->authUser($user);
-    }
-
-    /**
-     * validateRequestUserName
-     *
-     * @param string $name
-     * @return void
-     */
-    public function validateRequestUserName(string $name): void {
-        if(empty($name)) {
-            $this->data[]['message'] = 'Username wrong!';
-        }
-    }
-
-    /**
-     * validateRequestUserPassword
-     *
-     * @param string $password
-     * @return void
-     */
-    public function validateRequestUserPassword(string $password): void {
-        if(empty($password)) {
-            $this->data[]['message'] = 'Userpassword wrong!';
-        }
-    }
-
-    /**
-     * authUser
-     *
-     * @param \HauerHeinrich\Typo3MonitorApi\Domain\Model\User $user
-     * @return void
-     */
-    public function authUser(\HauerHeinrich\Typo3MonitorApi\Domain\Model\User $user): void {
-        if(empty($user->getUserName()) && empty($user->getUserPassword())) {
-            $this->data[]['message'] = 'Username or password not set!';
-            return;
+    public function authenticate(User $user): bool
+    {
+        $username = (string)$user->getUserName();
+        $password = (string)$user->getUserPassword();
+        if ($username === '' || $password === '') {
+            return false;
         }
 
-        // The context, either 'FE' or 'BE'
-        $mode = 'BE';
+        $config = $this->extensionConfiguration->get(Configuration::EXTENSION_KEY);
 
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('be_users')->createQueryBuilder();
-        $dbUser = $queryBuilder
-            ->select('username', 'password')
+        $allowedUsers = GeneralUtility::trimExplode(',', (string)($config['allowedUsers'] ?? ''), true);
+        if ($allowedUsers !== [] && !in_array($username, $allowedUsers, true)) {
+            return false;
+        }
+
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable('be_users');
+        $row = $queryBuilder
+            ->select('username', 'password', 'admin')
             ->from('be_users')
             ->where(
-                $queryBuilder->expr()->eq('username', $queryBuilder->createNamedParameter($user->getUserName()))
+                $queryBuilder->expr()->eq('username', $queryBuilder->createNamedParameter($username))
             )
-            ->executeQuery()->fetchAssociative();
+            ->setMaxResults(1)
+            ->executeQuery()
+            ->fetchAssociative();
 
-        if(empty($dbUser)) {
-            $this->data[]['message'] = 'No user found!';
-            return;
+        if ($row === false) {
+            return false;
         }
 
-        if(GeneralUtility::makeInstance(PasswordHashFactory::class)
-            ->get($dbUser['password'], $mode)
-            ->checkPassword($user->getUserPassword(), $dbUser['password'])) {
-                $this->isValid = true;
+        if ((int)$row['admin'] === 1 && !(bool)($config['allowAdminUsers'] ?? false)) {
+            return false;
         }
-    }
 
-    /**
-     * isValid
-     *
-     * @return boolean
-     */
-    public function isValid(): bool {
-        return $this->isValid;
-    }
+        $passwordHash = (string)$row['password'];
+        try {
+            $hashInstance = $this->passwordHashFactory->get($passwordHash, 'BE');
+        } catch (InvalidPasswordHashException) {
+            return false;
+        }
 
-    /**
-     * getLogData
-     *
-     * @return array
-     */
-    public function getLogData(): array {
-        return $this->data;
+        return $hashInstance->checkPassword($password, $passwordHash);
     }
 }
