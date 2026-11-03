@@ -18,7 +18,7 @@ use HauerHeinrich\Typo3MonitorApi\Utility\Route;
 use HauerHeinrich\Typo3MonitorApi\Authorization\OperationAuthorizationProvider;
 
 class RoutingConfig {
-    use HauerHeinrich\Typo3MonitorApi\Utility\CheckBodyContent;
+    use CheckBodyContent;
 
     protected $allowedHttpMethods = [];
 
